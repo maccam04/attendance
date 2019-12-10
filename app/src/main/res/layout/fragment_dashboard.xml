@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.DashboardFragment">
+
+    <ImageView
+        android:id="@+id/iv_add_section"
+        android:layout_width="139dp"
+        android:layout_height="241dp"
+        android:src="@drawable/addsection"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_leave_section"
+        app:layout_constraintEnd_toStartOf="@+id/iv_leave_section"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_leave_section" />
+
+    <ImageView
+        android:id="@+id/iv_leave_section"
+        android:layout_width="137dp"
+        android:layout_height="234dp"
+        android:layout_marginTop="32dp"
+        android:src="@drawable/leavesection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_add_section"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_list_section"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_marginTop="32dp"
+        android:src="@drawable/absences"
+        app:layout_constraintEnd_toEndOf="@+id/iv_leave_section"
+        app:layout_constraintStart_toStartOf="@+id/iv_leave_section"
+        app:layout_constraintTop_toBottomOf="@+id/iv_leave_section" />
+
+    <ImageView
+        android:id="@+id/iv_list_absence"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_marginTop="32dp"
+        android:src="@drawable/listsection"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_list_section"
+        app:layout_constraintEnd_toEndOf="@+id/iv_add_section"
+        app:layout_constraintStart_toStartOf="@+id/iv_add_section"
+        app:layout_constraintTop_toBottomOf="@+id/iv_add_section" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

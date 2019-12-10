@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "793352634157",
+    "firebase_url": "https://virtualattendance-9bf44.firebaseio.com",
+    "project_id": "virtualattendance-9bf44",
+    "storage_bucket": "virtualattendance-9bf44.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:793352634157:android:3f25a6fcc906b8c5d31da4",
+        "android_client_info": {
+          "package_name": "com.macsanityapps.virtualattendance"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "793352634157-1m17loo59b2vh1rekf5m70142jj6r4tr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.macsanityapps.virtualattendance",
+            "certificate_hash": "bdd9463f05da169a809df2da43e19cad3913ca6e"
+          }
+        },
+        {
+          "client_id": "793352634157-8r45m1pjpra5830inm7tj36sefv76fpb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAn0qSkvQeblHWly5M3mLCeZmYv_mXBzSw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "793352634157-8r45m1pjpra5830inm7tj36sefv76fpb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

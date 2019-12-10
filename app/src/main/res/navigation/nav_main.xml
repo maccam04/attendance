@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.macsanityapps.virtualattendance.login.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_registrationFragment"
+            app:destination="@id/registrationFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_teacherDashboardFragment"
+            app:destination="@id/teacherDashboardFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/registrationFragment"
+        android:name="com.macsanityapps.virtualattendance.view.RegistrationFragment"
+        android:label="fragment_registration"
+        tools:layout="@layout/fragment_registration" >
+        <action
+            android:id="@+id/action_registrationFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
+        <argument android:name="userData" app:argType="com.macsanityapps.virtualattendance.data.User" />
+        <action
+            android:id="@+id/action_registrationFragment_to_teacherDashboardFragment"
+            app:destination="@id/teacherDashboardFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.macsanityapps.virtualattendance.view.DashboardFragment"
+        android:label="fragment_dashboard"
+        tools:layout="@layout/fragment_dashboard" >
+        <action
+            android:id="@+id/action_dashboardFragment_to_addSectionFragment"
+            app:destination="@id/addSectionFragment" />
+        <action
+            android:id="@+id/action_dashboardFragment_to_sectionListFragment"
+            app:destination="@id/sectionListFragment" />
+        <action
+            android:id="@+id/action_dashboardFragment_to_absenceListFragment"
+            app:destination="@id/absenceListFragment" />
+        <action
+            android:id="@+id/action_dashboardFragment_to_updateProfileFragment"
+            app:destination="@id/updateProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addSectionFragment"
+        android:name="com.macsanityapps.virtualattendance.sections.AddSectionFragment"
+        android:label="fragment_add_section"
+        tools:layout="@layout/fragment_add_section" />
+    <fragment
+        android:id="@+id/sectionListFragment"
+        android:name="com.macsanityapps.virtualattendance.view.SectionListFragment"
+        android:label="fragment_section_list"
+        tools:layout="@layout/fragment_section_list" />
+    <fragment
+        android:id="@+id/absenceListFragment"
+        android:name="com.macsanityapps.virtualattendance.view.AbsenceListFragment"
+        android:label="fragment_absence_list"
+        tools:layout="@layout/fragment_absence_list" />
+    <fragment
+        android:id="@+id/teacherDashboardFragment"
+        android:name="com.macsanityapps.virtualattendance.view.TeacherDashboardFragment"
+        android:label="fragment_teacher_dashboard"
+        tools:layout="@layout/fragment_teacher_dashboard" />
+    <fragment
+        android:id="@+id/updateProfileFragment"
+        android:name="com.macsanityapps.virtualattendance.UpdateProfileFragment"
+        android:label="fragment_update_profile"
+        tools:layout="@layout/fragment_update_profile" />
+
+
+</navigation>
