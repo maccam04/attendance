@@ -17,4 +17,5 @@ class MainActivity : AppCompatActivity() {
         nav = Navigation.findNavController(this, R.id.nav_host_fragment)
 
     }
+
 }

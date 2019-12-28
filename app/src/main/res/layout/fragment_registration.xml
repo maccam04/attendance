@@ -35,11 +35,12 @@
         app:layout_constraintTop_toBottomOf="@+id/til_name">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/tie_username"
+            android:id="@+id/tie_id_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Student Id"
-            android:inputType="numberSigned" />
+            android:hint="Id Number"
+            android:inputType="numberSigned"
+            android:maxLength="7" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -105,4 +106,30 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/rg_role"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="@+id/til_course"
+        app:layout_constraintStart_toStartOf="@+id/til_course"
+        app:layout_constraintTop_toBottomOf="@+id/til_course">
+
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/rb_student"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="50dp"
+            android:text="Student" />
+
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/rb_prof"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Professor" />
+    </RadioGroup>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,20 +11,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.macsanityapps.virtualattendance.R
 import com.macsanityapps.virtualattendance.common.makeToast
-import com.macsanityapps.virtualattendance.sections.NoteListAdapter
-import com.macsanityapps.virtualattendance.sections.NoteListEvent
-import com.macsanityapps.virtualattendance.sections.SectionListViewModel
-import com.wiseassblog.jetpacknotesmvvmkotlin.note.notelist.buildlogic.NoteListInjector
+
 import kotlinx.android.synthetic.main.fragment_add_section.*
 
 /**
  * A simple [Fragment] subclass.
  */
 class SectionListFragment : Fragment() {
-
-    private lateinit var viewModel: SectionListViewModel
-    private lateinit var adapter: NoteListAdapter
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,85 +36,9 @@ class SectionListFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        viewModel = ViewModelProvider(
-            this,
-            NoteListInjector(requireActivity().application).provideNoteListViewModelFactory()
-        ).get(
-            SectionListViewModel::class.java
-        )
 
-        setUpAdapter()
-        observeViewModel()
-
-        viewModel.handleEvent(
-            NoteListEvent.OnStartSection
-        )
-    }
-
-    private fun setUpAdapter() {
-        adapter = NoteListAdapter()
-        adapter.event.observe(
-            viewLifecycleOwner,
-            Observer {
-                viewModel.handleEvent(it)
-            }
-        )
-
-        rec_list_fragment.adapter = adapter
 
     }
-
-    private fun observeViewModel() {
-        viewModel.error.observe(
-            viewLifecycleOwner,
-            Observer { errorMessage ->
-                showErrorState(errorMessage)
-            }
-        )
-
-        viewModel.noteList.observe(
-            viewLifecycleOwner,
-            Observer { noteList ->
-                adapter.submitList(noteList)
-
-            }
-        )
-
-        viewModel.editNote.observe(
-            viewLifecycleOwner,
-            Observer {
-
-                val builder = AlertDialog.Builder(activity)
-
-                // Set the alert dialog title
-                builder.setTitle("${it.contents}")
-
-                // Display a message on alert dialog
-                builder.setMessage("Leaving Request Sent!")
-
-                // Set a positive button and its click listener on alert dialog
-                builder.setPositiveButton("OK"){dialog, which ->
-
-                }
-
-                // Finally, make the alert dialog using builder
-                val dialog: AlertDialog = builder.create()
-
-                // Display the alert dialog on app interface
-                dialog.show()
-
-                // startNoteDetailWithArgs(noteId)
-            }
-        )
-    }
-
-/*    private fun startNoteDetailWithArgs(noteId: String) = findNavController().navigate(
-     //   NoteListViewDirections.actionNoteListViewToNoteDetailView(noteId)
-    )*/
-
-
-    private fun showErrorState(errorMessage: String?) = makeToast(errorMessage!!)
-
 
 
 }

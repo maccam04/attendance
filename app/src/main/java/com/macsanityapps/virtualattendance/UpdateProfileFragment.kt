@@ -8,17 +8,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.NonNull
-import androidx.navigation.fragment.findNavController
+import androidx.appcompat.app.AppCompatActivity
 import com.macsanityapps.virtualattendance.common.ValidationResult
 import com.macsanityapps.virtualattendance.common.ValidationRule
-import com.macsanityapps.virtualattendance.data.User
-import com.macsanityapps.virtualattendance.view.RegistrationFragmentDirections
-import kotlinx.android.synthetic.main.fragment_registration.*
+import com.macsanityapps.virtualattendance.data.AuthUser
 import kotlinx.android.synthetic.main.fragment_registration.btn_register
 import kotlinx.android.synthetic.main.fragment_registration.tie_contact_no
 import kotlinx.android.synthetic.main.fragment_registration.tie_email
 import kotlinx.android.synthetic.main.fragment_registration.tie_name
-import kotlinx.android.synthetic.main.fragment_registration.tie_username
 import kotlinx.android.synthetic.main.fragment_registration.til_contact
 import kotlinx.android.synthetic.main.fragment_registration.til_email
 import kotlinx.android.synthetic.main.fragment_registration.til_name
@@ -30,7 +27,7 @@ import kotlinx.android.synthetic.main.fragment_update_profile.til_user_name
  */
 class UpdateProfileFragment : Fragment() {
 
-    private var userData : User? = null
+    private var userData : AuthUser? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,6 +46,9 @@ class UpdateProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
+        (activity as AppCompatActivity).supportActionBar?.title = "Profile"
 
         val pref = activity?.getSharedPreferences("Account", 0)
         val bol = pref?.getBoolean("registered", false)
@@ -62,7 +62,7 @@ class UpdateProfileFragment : Fragment() {
         tie_contact_no.setText(mobileNo)
         tie_name.setText(name)
         tie_update_course.setText(cousre)
-        tie_username.setText(studentId)
+        tie_id_number.setText(studentId)
 
         btn_register.setOnClickListener {
 
@@ -70,7 +70,7 @@ class UpdateProfileFragment : Fragment() {
             val resultName = isInputValid(tie_name.text.toString())
             val resultContactNo = validatePhone(tie_contact_no.text.toString())
             val resultEmail = isInputValid(tie_email.text.toString())
-            val resultStundentId = isInputValid(tie_username.text.toString())
+            val resultStundentId = isInputValid(tie_id_number.text.toString())
             val resultCourse = isInputValid(tie_update_course.text.toString())
 
             if (!resultName.isValid) {
@@ -101,7 +101,7 @@ class UpdateProfileFragment : Fragment() {
                 )
                 val editor = pref?.edit()
                 editor?.putBoolean("registered", true)
-                editor?.putString("studentId", tie_username.text.toString())
+                editor?.putString("studentId", tie_id_number.text.toString())
                 editor?.putString("name", tie_name.text.toString())
                 editor?.putString("emai", tie_email.text.toString())
                 editor?.putString("phoneNumber", tie_contact_no.text.toString())

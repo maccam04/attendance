@@ -2,30 +2,28 @@ package com.macsanityapps.virtualattendance.login
 
 
 import android.content.Intent
-import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.addCallback
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import com.macsanityapps.virtualattendance.common.RC_SIGN_IN
-import com.macsanityapps.virtualattendance.login.buildLogic.LoginInjector
+import com.macsanityapps.virtualattendance.data.AuthUser
+import com.macsanityapps.virtualattendance.data.Rooms
 import kotlinx.android.synthetic.main.fragment_login.*
-import android.content.SharedPreferences
-import android.R
-import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.QueryDocumentSnapshot
+import com.macsanityapps.virtualattendance.common.makeToast
+import com.macsanityapps.virtualattendance.data.User
 
 
 /**
@@ -34,22 +32,82 @@ import androidx.appcompat.app.AppCompatActivity
 
 class LoginFragment : Fragment() {
 
-    private lateinit var viewModel: LoginViewModel
     private var key: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
+        /*FirebaseFirestore.getInstance().collection("Users")
+            .whereEqualTo("id", FirebaseAuth.getInstance().uid).query().addOnCompleteListener {
+
+            if (it.isSuccessful) {
+
+                val document = it.getResult()
+
+                document.documents
+
+                val direction = LoginFragmentDirections.actionLoginFragmentToDashboardFragment()
+                findNavController().navigate(direction)
+            }
+        }*/
+
+        val pref = activity?.getSharedPreferences("Account", 0)
+        val studentId = pref?.getString("studentId", "")
+
+        FirebaseFirestore.getInstance()
+            .collection("Users")
+            .whereEqualTo("id", if(studentId != "") studentId else "")
+            .get()
+            .addOnSuccessListener {
+
+                val taskList: List<User> = it.toObjects(User::class.java)
+                if(taskList.isNotEmpty()){
+                    when(taskList[0].type){
+
+                        0 -> {
+                            val direction = LoginFragmentDirections.actionLoginFragmentToDashboardFragment()
+                            findNavController().navigate(direction)
+                        }
+
+                        1 -> {
+                            val direction = LoginFragmentDirections.actionLoginFragmentToTeacherDashboardFragment()
+                            findNavController().navigate(direction)
+                        }
+                    }
+                } else {
+                    showView()
+                }
+
+            }
+            .addOnFailureListener {
+
+            }
+
     }
 
+    private fun showView(){
+        btn_signin.visibility = View.VISIBLE
+        tv_title.visibility = View.VISIBLE
+        iv_logo.visibility = View.VISIBLE
+    }
+
+    private fun hideView(){
+        btn_signin.visibility = View.INVISIBLE
+        tv_title.visibility = View.INVISIBLE
+        iv_logo.visibility = View.INVISIBLE
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(com.macsanityapps.virtualattendance.R.layout.fragment_login, container, false)
+        return inflater.inflate(
+            com.macsanityapps.virtualattendance.R.layout.fragment_login,
+            container,
+            false
+        )
     }
 
 
@@ -59,52 +117,15 @@ class LoginFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar!!.hide()
 
 
-        viewModel = ViewModelProvider(
-            this, LoginInjector(requireActivity().application).provideUserViewModelFactory()
-        )
-            .get(LoginViewModel::class.java)
+        btn_signin.setOnClickListener {
+            startSignInFlow()
+        }
 
-        observeViewModel()
-        setUpClickListeners()
-
-        viewModel.handleEvent(LoginEvent.OnStart)
-
-    }
-
-    private fun setUpClickListeners() {
-        btn_signin.setOnClickListener { viewModel.handleEvent(LoginEvent.OnSignInClick) }
     }
 
     private fun observeViewModel() {
         val pref = activity?.getSharedPreferences("Account", 0)
         val bol = pref?.getBoolean("registered", false)
-
-        viewModel.isAuthComplete.observe(
-            viewLifecycleOwner,
-            Observer {
-
-                if (it.isLogin) {
-
-                    if (bol!!) {
-                        val direction = LoginFragmentDirections.actionLoginFragmentToDashboardFragment()
-                        findNavController().navigate(direction)
-
-                    } else {
-                        val direction =
-                            LoginFragmentDirections.actionLoginFragmentToRegistrationFragment(it)
-                        findNavController().navigate(direction)
-                    }
-                }
-            }
-
-        )
-
-        viewModel.authAttempt.observe(
-            viewLifecycleOwner,
-            Observer { startSignInFlow() }
-        )
-
-
     }
 
 
@@ -113,7 +134,6 @@ class LoginFragment : Fragment() {
             .requestIdToken("793352634157-8r45m1pjpra5830inm7tj36sefv76fpb.apps.googleusercontent.com")
             .requestEmail()
             .build()
-
 
         val googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
@@ -124,30 +144,23 @@ class LoginFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-        var userToken: String? = null
+        if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
 
-        print(task.exception)
+            try {
+                val account: GoogleSignInAccount? = task.getResult(ApiException::class.java)
 
-        try {
-            val account: GoogleSignInAccount? = task.getResult(ApiException::class.java)
 
-            if (account != null) userToken = account.idToken
-
-            print(account)
-        } catch (exception: Exception) {
-            Log.d("LOGIN", exception.toString())
-        }
-
-        viewModel.handleEvent(
-            LoginEvent.OnLoginSignInResult(
-                LoginResult(
-                    requestCode,
-                    userToken
+                val direction = LoginFragmentDirections.actionLoginFragmentToRegistrationFragment(
+                    AuthUser(account?.id!!, account.displayName!!, account.email!!)
                 )
-            )
-        )
 
+                findNavController().navigate(direction)
+
+            } catch (exception: Exception) {
+                Log.d("LOGIN", exception.toString())
+            }
+        }
     }
 
 
