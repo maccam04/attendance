@@ -14,6 +14,7 @@ import com.macsanityapps.virtualattendance.data.Rooms
 
 
 class RoomsAdapter(
+    private var type: Int,
     options: FirestoreRecyclerOptions<Rooms>,
     private var roomListener: RoomListener
 ) :
@@ -25,6 +26,16 @@ class RoomsAdapter(
         position: Int,
         rooms: Rooms
     ) {
+
+        when(type){
+
+            0 -> {
+                holder.btnViewStudent.text = "Apply"
+                holder.btnViewSeatMap.visibility = View.GONE
+            }
+
+        }
+
         holder.tvRoomId.text = rooms.desc
         holder.tvRoomCode.text = rooms.id
 

@@ -148,20 +148,11 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
             .setQuery(query, Rooms::class.java)
             .build()
 
-        roomsAdapter = RoomsAdapter(options, this)
+        roomsAdapter = RoomsAdapter(1, options, this)
         rv_rooms.adapter = roomsAdapter
 
         roomsAdapter!!.startListening()
-/*
 
-        if(roomsAdapter!!.itemCount > 0) {
-            tv_empty.visibility = View.GONE
-            rv_rooms.visibility = View.VISIBLE
-        } else {
-            tv_empty.visibility = View.VISIBLE
-            rv_rooms.visibility = View.GONE
-        }
-*/
 
         val itemTouchHelper = ItemTouchHelper(simpleCallback)
         itemTouchHelper.attachToRecyclerView(rv_rooms)
@@ -234,7 +225,7 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
     override fun handleDeleteItem(snapshot: DocumentSnapshot) {
 
         val documentReference = snapshot.reference
-        val rooms = snapshot.toObject(Rooms::class.java)
+        snapshot.toObject(Rooms::class.java)
 
         documentReference.delete()
             .addOnSuccessListener {

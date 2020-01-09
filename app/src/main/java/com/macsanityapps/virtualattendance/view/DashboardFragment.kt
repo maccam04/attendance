@@ -85,10 +85,11 @@ class DashboardFragment : Fragment() {
             val dir = DashboardFragmentDirections.actionDashboardFragmentToAddSectionFragment()
             findNavController().navigate(dir)
         }
+
+        //absent list
         iv_list_section.setOnClickListener {
             val dir = DashboardFragmentDirections.actionDashboardFragmentToAbsenceListFragment()
             findNavController().navigate(dir)
-
         }
 
     }
@@ -101,7 +102,7 @@ class DashboardFragment : Fragment() {
         val dialogLayout = inflater.inflate(R.layout.layout_add_room, null)
         val editText = dialogLayout.findViewById<EditText>(R.id.et_code)
         builder.setView(dialogLayout)
-        builder.setPositiveButton("Submit") { dialogInterface, i ->
+        builder.setPositiveButton("Submit") { _, i ->
 
             FirebaseFirestore.getInstance()
                 .collection("Rooms")

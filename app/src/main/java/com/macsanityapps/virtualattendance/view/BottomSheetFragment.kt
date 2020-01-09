@@ -7,27 +7,24 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
 
 import com.macsanityapps.virtualattendance.R
-import com.macsanityapps.virtualattendance.data.User
-import kotlinx.android.synthetic.main.fragment_bottom_sheet.*
 
 /**
  * A simple [Fragment] subclass.
  */
 class BottomSheetFragment : BottomSheetDialogFragment(), StudentAdapter.StudentListener {
-    override fun handleDisapproved(snapshot: DocumentSnapshot) {
+    override fun handleApproved(id: String?, adapterPosition: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun handleDisapproved(id: String?, adapterPosition: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 
     private var studentAdapter: StudentAdapter? = null
 
@@ -77,8 +74,5 @@ class BottomSheetFragment : BottomSheetDialogFragment(), StudentAdapter.StudentL
     }
 
 
-    override fun handleApproved(snapshot: DocumentSnapshot) {
-
-    }
 
 }

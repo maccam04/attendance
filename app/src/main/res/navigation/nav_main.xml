@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.macsanityapps.virtualattendance.login.LoginFragment"
+        android:name="com.macsanityapps.virtualattendance.view.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
@@ -86,12 +86,12 @@
     </fragment>
     <fragment
         android:id="@+id/updateProfileFragment"
-        android:name="com.macsanityapps.virtualattendance.UpdateProfileFragment"
+        android:name="com.macsanityapps.virtualattendance.view.UpdateProfileFragment"
         android:label="fragment_update_profile"
         tools:layout="@layout/fragment_update_profile" />
     <fragment
         android:id="@+id/studentRequestFragment"
-        android:name="com.macsanityapps.virtualattendance.StudentRequestFragment"
+        android:name="com.macsanityapps.virtualattendance.view.StudentRequestFragment"
         android:label="fragment_student_request"
         tools:layout="@layout/fragment_student_request" >
         <argument

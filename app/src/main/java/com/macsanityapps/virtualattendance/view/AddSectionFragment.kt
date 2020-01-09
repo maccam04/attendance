@@ -15,6 +15,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.macsanityapps.virtualattendance.R
+import com.macsanityapps.virtualattendance.common.makeToast
 import com.macsanityapps.virtualattendance.data.Rooms
 import com.macsanityapps.virtualattendance.data.User
 import kotlinx.android.synthetic.main.fragment_add_section.*
@@ -61,7 +62,7 @@ class AddSectionFragment : Fragment(), RoomsAdapter.RoomListener {
             .setQuery(query, Rooms::class.java)
             .build()
 
-        roomsAdapter = RoomsAdapter(options, this)
+        roomsAdapter = RoomsAdapter(0, options, this)
         rec_list_fragment.adapter = roomsAdapter
 
         roomsAdapter!!.startListening()
@@ -81,9 +82,56 @@ class AddSectionFragment : Fragment(), RoomsAdapter.RoomListener {
         val mobileNo = pref?.getString("phoneNumber", "")
         val name = pref?.getString("name", "")
         val cousre = pref?.getString("course", "")
+        val token = pref?.getString("token", "")
 
-        val user = User(studentId, name, email, mobileNo, cousre, 0, true)
+        val user = User(studentId, name, email, mobileNo, cousre, 0, true, "Present", token!!)
 
+
+        FirebaseFirestore.getInstance()
+            .collection("Rooms")
+            .document(data!!.id)
+            .collection("students")
+            .document(studentId!!)
+            .get()
+            .addOnSuccessListener {
+
+                if(it.exists()){
+                    makeToast("You're already sent a request to this room!. ")
+                } else {
+
+                    FirebaseFirestore.getInstance()
+                        .collection("Rooms")
+                        .document(data!!.id)
+                        .collection("students")
+                        .document(studentId!!)
+                        .set(user)
+                        .addOnSuccessListener {
+                            val builder = AlertDialog.Builder(activity)
+
+                            // Set the alert dialog title
+                            builder.setTitle("Request Sent!")
+
+                            // Display a message on alert dialog
+                            builder.setMessage("Please wait for your professor to accept your request!")
+
+                            // Set a positive button and its click listener on alert dialog
+                            builder.setPositiveButton("OK"){ _, _ -> }
+
+                            // Finally, make the alert dialog using builder
+                            val dialog: AlertDialog = builder.create()
+
+                            // Display the alert dialog on app interface
+                            dialog.show()
+
+                        }.addOnFailureListener {
+                            Log.e("ERROR", it.localizedMessage)
+                            makeToast("Something went wrong. Please Try again later.")
+                        }
+                }
+            }
+
+
+/*
         FirebaseFirestore.getInstance()
             .collection("room${data!!.id}")
             .add(user)
@@ -110,7 +158,7 @@ class AddSectionFragment : Fragment(), RoomsAdapter.RoomListener {
             .addOnFailureListener {
                 Log.d("OnFailure", it.localizedMessage!!)
 
-            }
+            }*/
     }
 
     override fun handleViewMap(snapshot: DocumentSnapshot) {

@@ -1,4 +1,4 @@
-package com.macsanityapps.virtualattendance
+package com.macsanityapps.virtualattendance.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

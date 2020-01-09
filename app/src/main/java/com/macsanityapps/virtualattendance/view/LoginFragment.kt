@@ -1,4 +1,4 @@
-package com.macsanityapps.virtualattendance.login
+package com.macsanityapps.virtualattendance.view
 
 
 import android.content.Intent
@@ -14,16 +14,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.macsanityapps.virtualattendance.common.RC_SIGN_IN
 import com.macsanityapps.virtualattendance.data.AuthUser
-import com.macsanityapps.virtualattendance.data.Rooms
 import kotlinx.android.synthetic.main.fragment_login.*
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.QueryDocumentSnapshot
-import com.macsanityapps.virtualattendance.common.makeToast
 import com.macsanityapps.virtualattendance.data.User
+import com.macsanityapps.virtualattendance.login.LoginFragmentDirections
 
 
 /**
@@ -66,12 +62,14 @@ class LoginFragment : Fragment() {
                     when(taskList[0].type){
 
                         0 -> {
-                            val direction = LoginFragmentDirections.actionLoginFragmentToDashboardFragment()
+                            val direction =
+                                LoginFragmentDirections.actionLoginFragmentToDashboardFragment()
                             findNavController().navigate(direction)
                         }
 
                         1 -> {
-                            val direction = LoginFragmentDirections.actionLoginFragmentToTeacherDashboardFragment()
+                            val direction =
+                                LoginFragmentDirections.actionLoginFragmentToTeacherDashboardFragment()
                             findNavController().navigate(direction)
                         }
                     }
@@ -151,9 +149,10 @@ class LoginFragment : Fragment() {
                 val account: GoogleSignInAccount? = task.getResult(ApiException::class.java)
 
 
-                val direction = LoginFragmentDirections.actionLoginFragmentToRegistrationFragment(
-                    AuthUser(account?.id!!, account.displayName!!, account.email!!)
-                )
+                val direction =
+                    LoginFragmentDirections.actionLoginFragmentToRegistrationFragment(
+                        AuthUser(account?.id!!, account.displayName!!, account.email!!)
+                    )
 
                 findNavController().navigate(direction)
 

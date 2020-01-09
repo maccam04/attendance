@@ -1,25 +1,18 @@
 package com.macsanityapps.virtualattendance.view
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter
-import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.firebase.firestore.DocumentSnapshot
 import com.macsanityapps.virtualattendance.R
-import com.macsanityapps.virtualattendance.data.Rooms
 import com.macsanityapps.virtualattendance.data.User
 
-class StudentAdapter(
-    options: FirestoreRecyclerOptions<Rooms>,
-     var studentListener: StudentListener
-) :
-    FirestoreRecyclerAdapter<Rooms, StudentAdapter.StudentViewHolder>(
-        options
-    ) {
+class StudentAdapter(var context: Context, var studentListener: StudentListener) : RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
+
+    private var options : MutableList<User> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudentViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -27,12 +20,13 @@ class StudentAdapter(
         return StudentViewHolder(view)
     }
 
-    override fun onBindViewHolder(
-        holder: StudentViewHolder,
-        position: Int,
-        model: Rooms
-    ) {
-        holder.tvRoomId.text = model.students!![position].name
+    fun addStudent( data : MutableList<User>){
+        options.clear()
+        options.addAll(data)
+        notifyDataSetChanged()
+    }
+    override fun onBindViewHolder(holder: StudentViewHolder, position: Int) {
+        holder.tvRoomId.text = options[position].name
     }
 
 
@@ -45,20 +39,25 @@ class StudentAdapter(
         init {
 
             btnApproved.setOnClickListener {
-                studentListener.handleApproved(snapshots.getSnapshot(adapterPosition))
+                studentListener.handleApproved(options[adapterPosition].id, adapterPosition)
             }
 
             btnDisapproved.setOnClickListener {
 
-                studentListener.handleDisapproved(snapshots.getSnapshot(adapterPosition))
+                studentListener.handleDisapproved(options[adapterPosition].id, adapterPosition)
             }
         }
     }
 
-    interface StudentListener {
-
-        fun handleApproved(snapshot: DocumentSnapshot)
-        fun handleDisapproved(snapshot: DocumentSnapshot)
+    override fun getItemCount(): Int {
+        return options.size
     }
 
+
+    interface StudentListener {
+
+        fun handleApproved(id: String?, adapterPosition: Int)
+        fun handleDisapproved(id: String?, adapterPosition: Int)
+
+    }
 }

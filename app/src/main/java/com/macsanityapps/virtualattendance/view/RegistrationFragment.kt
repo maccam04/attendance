@@ -10,8 +10,12 @@ import android.widget.RadioButton
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.iid.FirebaseInstanceId
+import com.google.firebase.iid.InstanceIdResult
 import com.macsanityapps.virtualattendance.R
 
 import com.macsanityapps.virtualattendance.common.ValidationResult
@@ -28,11 +32,29 @@ import kotlinx.android.synthetic.main.fragment_registration.til_contact
 import kotlinx.android.synthetic.main.fragment_registration.til_email
 import kotlinx.android.synthetic.main.fragment_registration.til_name
 
+
+
 class RegistrationFragment : Fragment() {
 
     private var userData: AuthUser? = null
     private var role: Int? = null
+    var token : String? = ""
 
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        FirebaseInstanceId.getInstance().instanceId
+            .addOnCompleteListener(OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    return@OnCompleteListener
+                }
+
+                // Get new Instance ID token
+                token = task.result?.token
+                Log.e("TAG", token)
+            })
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -61,10 +83,10 @@ class RegistrationFragment : Fragment() {
         rg_role.setOnCheckedChangeListener { group, checkedId ->
 
             when(checkedId){
-                R.id.rb_student -> {
+                com.macsanityapps.virtualattendance.R.id.rb_student -> {
                     role = 0
                 }
-                R.id.rb_prof -> {
+                com.macsanityapps.virtualattendance.R.id.rb_prof -> {
                     role = 1
                 }
             }
@@ -73,11 +95,13 @@ class RegistrationFragment : Fragment() {
 
         btn_register.setOnClickListener {
 
+
             val resultName = isInputValid(tie_name.text.toString())
             val resultContactNo = validatePhone(tie_contact_no.text.toString())
             val resultEmail = isInputValid(tie_email.text.toString())
             val resultStundentId = isInputValid(tie_id_number.text.toString())
             val resultCourse = isInputValid(tie_course.text.toString())
+
 
             if (!resultName.isValid) {
                 til_name.error = resultName.reason
@@ -112,8 +136,8 @@ class RegistrationFragment : Fragment() {
                 editor?.putString("emai", tie_email.text.toString())
                 editor?.putString("phoneNumber", tie_contact_no.text.toString())
                 editor?.putString("course", tie_course.text.toString())
+                editor?.putString("token", token)
                 editor?.apply()
-
 
                 val user = User(
                     tie_id_number.text.toString(),
@@ -122,7 +146,10 @@ class RegistrationFragment : Fragment() {
                     tie_contact_no.text.toString(),
                     tie_course.text.toString(),
                     role!!,
-                    true
+                    true,
+                    "Present",
+                    token!!
+
                 )
 
                 FirebaseFirestore.getInstance()

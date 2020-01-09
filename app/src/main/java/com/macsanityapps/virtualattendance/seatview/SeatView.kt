@@ -303,7 +303,7 @@ class SeatView : View {
                 val seatRectF = config.getSeatRect(rowIndex, columnIndex, seatBean)
 
                 if (seatRectF.right < config.windowRectF.left || seatRectF.left > config.windowRectF.right
-                        || seatRectF.top > config.windowRectF.bottom || seatRectF.bottom < config.windowRectF.top) {
+                    || seatRectF.top > config.windowRectF.bottom || seatRectF.bottom < config.windowRectF.top) {
                     continue
                 }
 
@@ -349,6 +349,7 @@ class SeatView : View {
                     DrawableCompat.setTint(drawable, Color.parseColor(color))
                 }
                 bitmap = Bitmap.createBitmap(width.toInt(), height.toInt(), Bitmap.Config.ARGB_8888)
+
                 val canvas = Canvas(bitmap!!)
                 drawable.setBounds(0, 0, width.toInt(), height.toInt())
                 drawable.draw(canvas)

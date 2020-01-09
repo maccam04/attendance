@@ -1,4 +1,4 @@
-package com.macsanityapps.virtualattendance
+package com.macsanityapps.virtualattendance.view
 
 
 import android.app.AlertDialog
@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
+import com.macsanityapps.virtualattendance.R
 import com.macsanityapps.virtualattendance.common.ValidationResult
 import com.macsanityapps.virtualattendance.common.ValidationRule
 import com.macsanityapps.virtualattendance.data.AuthUser
