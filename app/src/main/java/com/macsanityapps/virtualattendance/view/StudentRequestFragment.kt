@@ -129,6 +129,7 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener {
                 .update(map as Map<String, Int>)
                 .addOnSuccessListener {
                     makeToast("Successfully approved!")
+                    //TODO:: Invalid index NPE
                     dataList.removeAt(adapterPosition)
                     studentAdapter.addStudent(dataList)
                 }.addOnFailureListener {

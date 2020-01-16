@@ -17,6 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.iid.InstanceIdResult
 import com.macsanityapps.virtualattendance.R
+import com.macsanityapps.virtualattendance.common.SelectionDialogListener
 
 import com.macsanityapps.virtualattendance.common.ValidationResult
 import com.macsanityapps.virtualattendance.common.ValidationRule
@@ -33,12 +34,11 @@ import kotlinx.android.synthetic.main.fragment_registration.til_email
 import kotlinx.android.synthetic.main.fragment_registration.til_name
 
 
-
-class RegistrationFragment : Fragment() {
+class RegistrationFragment : Fragment(), SelectionDialogListener {
 
     private var userData: AuthUser? = null
     private var role: Int? = null
-    var token : String? = ""
+    var token: String? = ""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +54,10 @@ class RegistrationFragment : Fragment() {
                 token = task.result?.token
                 Log.e("TAG", token)
             })
+
+
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -80,18 +83,11 @@ class RegistrationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        rg_role.setOnCheckedChangeListener { group, checkedId ->
-
-            when(checkedId){
-                com.macsanityapps.virtualattendance.R.id.rb_student -> {
-                    role = 0
-                }
-                com.macsanityapps.virtualattendance.R.id.rb_prof -> {
-                    role = 1
-                }
-            }
-        }
-
+        val dialogFragment = SelectionDialogFragment()
+        dialogFragment.newInstance()
+        dialogFragment.isCancelable = false
+        activity?.supportFragmentManager?.let { dialogFragment.show(it, "dialog") }
+        dialogFragment.setSelectionDialogListener(this)
 
         btn_register.setOnClickListener {
 
@@ -158,11 +154,15 @@ class RegistrationFragment : Fragment() {
                     .set(user)
                     .addOnSuccessListener {
 
-                        if(role!! == 0){
-                            val direction = RegistrationFragmentDirections.actionRegistrationFragmentToDashboardFragment()
+                        if (role!! == 0) {
+                            //Students
+                            val direction =
+                                RegistrationFragmentDirections.actionRegistrationFragmentToDashboardFragment()
                             findNavController().navigate(direction)
                         } else {
-                            val direction = RegistrationFragmentDirections.actionRegistrationFragmentToTeacherDashboardFragment()
+                            //Professor
+                            val direction =
+                                RegistrationFragmentDirections.actionRegistrationFragmentToTeacherDashboardFragment()
                             findNavController().navigate(direction)
                         }
 
@@ -190,4 +190,13 @@ class RegistrationFragment : Fragment() {
             ValidationResult.success(phone)
         } else ValidationResult.failure("Mobile number should be exactly 11 numbers.", phone)
     }
+
+    override fun onSelectStudent() {
+        role = 0
+    }
+
+    override fun onSelectTeacher() {
+        role = 1
+    }
+
 }

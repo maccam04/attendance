@@ -19,7 +19,6 @@ import com.macsanityapps.virtualattendance.common.RC_SIGN_IN
 import com.macsanityapps.virtualattendance.data.AuthUser
 import kotlinx.android.synthetic.main.fragment_login.*
 import com.macsanityapps.virtualattendance.data.User
-import com.macsanityapps.virtualattendance.login.LoginFragmentDirections
 
 
 /**
@@ -32,7 +31,6 @@ class LoginFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         /*FirebaseFirestore.getInstance().collection("Users")
             .whereEqualTo("id", FirebaseAuth.getInstance().uid).query().addOnCompleteListener {
@@ -62,8 +60,7 @@ class LoginFragment : Fragment() {
                     when(taskList[0].type){
 
                         0 -> {
-                            val direction =
-                                LoginFragmentDirections.actionLoginFragmentToDashboardFragment()
+                            val direction = LoginFragmentDirections.actionLoginFragmentToDashboardFragment()
                             findNavController().navigate(direction)
                         }
 

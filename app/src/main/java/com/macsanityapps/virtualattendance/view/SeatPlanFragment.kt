@@ -41,15 +41,24 @@ import kotlin.math.log
 class SeatPlanFragment : Fragment(), Callback<String> {
 
     private var size: String? = ""
-    private var data : MutableList<User> = mutableListOf()
-    private var index : Int? = 0
+    private var data: MutableList<User> = mutableListOf()
+    private var index: Int? = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(com.macsanityapps.virtualattendance.R.layout.fragment_seat_plan, container, false)
+        return inflater.inflate(
+            com.macsanityapps.virtualattendance.R.layout.fragment_seat_plan,
+            container,
+            false
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -57,7 +66,9 @@ class SeatPlanFragment : Fragment(), Callback<String> {
 
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
-        (activity as AppCompatActivity).supportActionBar?.title = "Room ${arguments!!.getString("name")}"
+
+        (activity as AppCompatActivity).supportActionBar?.title =
+            "Room ${arguments!!.getString("name")}"
 
         val rowCount = 5
         val columnCount = 10
@@ -73,7 +84,7 @@ class SeatPlanFragment : Fragment(), Callback<String> {
                 data = it.toObjects(User::class.java)
                 tv_student_count.text = "Number of Student/s in this section: ${data.size}"
 
-                if(data.size != 0 ) {
+                if (data.size != 0) {
                     size = data.size.toString()
                 }
             }
@@ -108,9 +119,17 @@ class SeatPlanFragment : Fragment(), Callback<String> {
                 .document(data[index!!].id.toString())
                 .collection("attendance")
                 .document(getCurrentDate())
-                .set(Attendance(id = "${arguments!!.getString("id")}" , course = "${arguments!!.getString("name")}", date = getCurrentDate(), userId = data[index!!].id.toString(), present = true))
+                .set(
+                    Attendance(
+                        id = "${arguments!!.getString("id")}",
+                        course = "${arguments!!.getString("name")}",
+                        date = getCurrentDate(),
+                        userId = data[index!!].id.toString(),
+                        present = true
+                    )
+                )
                 .addOnSuccessListener {
-                   makeToast("Mark as Present")
+                    makeToast("Mark as Present")
 
                     FirebaseFirestore.getInstance()
                         .collectionGroup("attendance")
@@ -125,7 +144,7 @@ class SeatPlanFragment : Fragment(), Callback<String> {
                             for (dc in snapshots!!) {
                                 val data = dc.toObject(Attendance::class.java)
                                 Log.e("DATA", data.toString())
-                                tv_status.text = if(data.present) "Present" else "Absent"
+                                tv_status.text = if (data.present) "Present" else "Absent"
                             }
                         }
                 }
@@ -142,7 +161,15 @@ class SeatPlanFragment : Fragment(), Callback<String> {
                 .document(data[index!!].id.toString())
                 .collection("attendance")
                 .document(getCurrentDate())
-                .set(Attendance(id = "${arguments!!.getString("id")}" ,course = "${arguments!!.getString("name")}", date = getCurrentDate(), userId = data[index!!].id.toString(), present = false))
+                .set(
+                    Attendance(
+                        id = "${arguments!!.getString("id")}",
+                        course = "${arguments!!.getString("name")}",
+                        date = getCurrentDate(),
+                        userId = data[index!!].id.toString(),
+                        present = false
+                    )
+                )
                 .addOnSuccessListener {
                     makeToast("Mark as Absent")
 
@@ -178,7 +205,7 @@ class SeatPlanFragment : Fragment(), Callback<String> {
                             for (dc in snapshots!!) {
                                 val data = dc.toObject(Attendance::class.java)
                                 Log.e("DATA", data.toString())
-                                tv_status.text = if(data.present) "Present" else "Absent"
+                                tv_status.text = if (data.present) "Present" else "Absent"
                             }
                         }
                 }
@@ -192,16 +219,15 @@ class SeatPlanFragment : Fragment(), Callback<String> {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+
             android.R.id.home -> {
-
-                requireActivity().onBackPressedDispatcher.addCallback(this) {
-                    findNavController().navigate(com.macsanityapps.virtualattendance.R.id.teacherDashboardFragment)
-                }
-
+                activity?.onBackPressed()
                 true
             }
 
-            else -> super.onOptionsItemSelected(item)
+            else -> {
+                false
+            }
         }
     }
 
@@ -216,7 +242,7 @@ class SeatPlanFragment : Fragment(), Callback<String> {
             override fun seatSelected(selectedSeat: Seat, selectedSeats: HashMap<String, Seat>) {
                 index = selectedSeat.columnIndex
 
-                if(selectedSeat.id!!.toInt() < data.size){
+                if (selectedSeat.id!!.toInt() < data.size) {
                     printStudentInfo(data[selectedSeat.id!!.toInt()])
                 } else {
                     clearState()
@@ -285,10 +311,10 @@ class SeatPlanFragment : Fragment(), Callback<String> {
 
     }
 
-    private fun printStudentInfo(user: User){
+    private fun printStudentInfo(user: User) {
 
         tv_name.text = user.name
-        tv_student_no.text= user.id
+        tv_student_no.text = user.id
         tv_course.text = user.course
         tv_date.text = getCurrentDate()
 
@@ -305,7 +331,9 @@ class SeatPlanFragment : Fragment(), Callback<String> {
                 for (dc in snapshots!!) {
                     val data = dc.toObject(Attendance::class.java)
                     Log.e("DATA", data.toString())
-                    tv_status.text = if(data.present) "Present" else "Absent"
+
+                    //TODO:: java.lang.IllegalStateException: tv_status must not be null
+                    tv_status.text = if (data.present) "Present" else "Absent"
                 }
             }
 
@@ -314,7 +342,7 @@ class SeatPlanFragment : Fragment(), Callback<String> {
 
     }
 
-    private fun getCurrentDate() : String {
+    private fun getCurrentDate(): String {
         val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
         return sdf.format(Date())
     }
@@ -322,13 +350,15 @@ class SeatPlanFragment : Fragment(), Callback<String> {
     interface ApiService {
 
         companion object {
-            var URL_BASE =  "https://fcm.googleapis.com/"
+            var URL_BASE = "https://fcm.googleapis.com/"
         }
 
-        @Headers("Authorization: key=AIzaSyBQlmsQSoQwYGW_LDVBcqSlOQx16ElW-nk",
-                         "Content-Type: application/json")
+        @Headers(
+            "Authorization: key=AIzaSyBQlmsQSoQwYGW_LDVBcqSlOQx16ElW-nk",
+            "Content-Type: application/json"
+        )
         @POST("fcm/send")
-        fun sendData(@Body notif : String) : Call<String>
+        fun sendData(@Body notif: String): Call<String>
 
     }
 
