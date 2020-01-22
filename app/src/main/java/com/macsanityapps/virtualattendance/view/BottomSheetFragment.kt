@@ -12,12 +12,13 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 import com.macsanityapps.virtualattendance.R
+import com.macsanityapps.virtualattendance.data.User
 
 /**
  * A simple [Fragment] subclass.
  */
 class BottomSheetFragment : BottomSheetDialogFragment(), StudentAdapter.StudentListener {
-    override fun handleApproved(id: String?, adapterPosition: Int) {
+    override fun handleApproved(id: User, adapterPosition: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

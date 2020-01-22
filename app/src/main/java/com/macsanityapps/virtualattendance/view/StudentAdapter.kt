@@ -39,7 +39,7 @@ class StudentAdapter(var context: Context, var studentListener: StudentListener)
         init {
 
             btnApproved.setOnClickListener {
-                studentListener.handleApproved(options[adapterPosition].id, adapterPosition)
+                studentListener.handleApproved(options[adapterPosition], adapterPosition)
             }
 
             btnDisapproved.setOnClickListener {
@@ -56,7 +56,7 @@ class StudentAdapter(var context: Context, var studentListener: StudentListener)
 
     interface StudentListener {
 
-        fun handleApproved(id: String?, adapterPosition: Int)
+        fun handleApproved(user: User, adapterPosition: Int)
         fun handleDisapproved(id: String?, adapterPosition: Int)
 
     }

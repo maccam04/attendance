@@ -6,16 +6,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioButton
+import android.widget.AdapterView
 import androidx.annotation.NonNull
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.iid.FirebaseInstanceId
-import com.google.firebase.iid.InstanceIdResult
 import com.macsanityapps.virtualattendance.R
 import com.macsanityapps.virtualattendance.common.SelectionDialogListener
 
@@ -34,7 +32,9 @@ import kotlinx.android.synthetic.main.fragment_registration.til_email
 import kotlinx.android.synthetic.main.fragment_registration.til_name
 
 
-class RegistrationFragment : Fragment(), SelectionDialogListener {
+class RegistrationFragment : Fragment(), SelectionDialogListener,
+    AdapterView.OnItemSelectedListener {
+
 
     private var userData: AuthUser? = null
     private var role: Int? = null
@@ -83,12 +83,15 @@ class RegistrationFragment : Fragment(), SelectionDialogListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        (activity as AppCompatActivity).supportActionBar?.title = "Registration"
+        (activity as AppCompatActivity).supportActionBar?.show()
+
         val dialogFragment = SelectionDialogFragment()
         dialogFragment.newInstance()
         dialogFragment.isCancelable = false
         activity?.supportFragmentManager?.let { dialogFragment.show(it, "dialog") }
         dialogFragment.setSelectionDialogListener(this)
-
+ 
         btn_register.setOnClickListener {
 
 
@@ -96,8 +99,6 @@ class RegistrationFragment : Fragment(), SelectionDialogListener {
             val resultContactNo = validatePhone(tie_contact_no.text.toString())
             val resultEmail = isInputValid(tie_email.text.toString())
             val resultStundentId = isInputValid(tie_id_number.text.toString())
-            val resultCourse = isInputValid(tie_course.text.toString())
-
 
             if (!resultName.isValid) {
                 til_name.error = resultName.reason
@@ -112,68 +113,163 @@ class RegistrationFragment : Fragment(), SelectionDialogListener {
             } else til_contact.error = ""
 
             if (!resultStundentId.isValid) {
-                til_username.error = resultStundentId.reason
-            } else til_username.error = ""
+                til_id.error = resultStundentId.reason
+            } else til_id.error = ""
 
-            if (!resultCourse.isValid) {
+          /*  if (!resultCourse.isValid) {
                 til_course.error = resultCourse.reason
             } else til_course.error = ""
+*/
 
-            if (resultName.isValid && resultEmail.isValid && resultContactNo.isValid && resultStundentId.isValid && resultCourse.isValid) {
+            val pref = activity?.getSharedPreferences(
+                "Account",
+                0
+            )
 
-                val pref = activity?.getSharedPreferences(
-                    "Account",
-                    0
-                )
-                val editor = pref?.edit()
-                editor?.putBoolean("registered", true)
-                editor?.putString("studentId", tie_id_number.text.toString())
-                editor?.putString("name", tie_name.text.toString())
-                editor?.putString("emai", tie_email.text.toString())
-                editor?.putString("phoneNumber", tie_contact_no.text.toString())
-                editor?.putString("course", tie_course.text.toString())
-                editor?.putString("token", token)
-                editor?.apply()
+            if(role == 0){
+                if (resultName.isValid && resultEmail.isValid && resultContactNo.isValid && resultStundentId.isValid) {
 
-                val user = User(
-                    tie_id_number.text.toString(),
-                    tie_name.text.toString(),
-                    tie_email.text.toString(),
-                    tie_contact_no.text.toString(),
-                    tie_course.text.toString(),
-                    role!!,
-                    true,
-                    "Present",
-                    token!!
+                    val editor = pref?.edit()
+                    editor?.putBoolean("registered", true)
+                    editor?.putString("studentId", tie_id_number.text.toString())
+                    editor?.putString("name", tie_name.text.toString())
+                    editor?.putString("email", tie_email.text.toString())
+                    editor?.putString("phoneNumber", tie_contact_no.text.toString())
+                    editor?.putString("course", if(role == 0) til_course.selectedItem.toString() else "")
+                    editor?.putString("token", token)
+                    editor?.apply()
 
-                )
+                    val user = User(
+                        tie_id_number.text.toString(),
+                        tie_name.text.toString(),
+                        tie_email.text.toString(),
+                        tie_contact_no.text.toString(),
+                        til_course.selectedItem.toString() ,
+                        role!!,
+                        true,
+                        "Present",
+                        token!!
+                    )
 
-                FirebaseFirestore.getInstance()
-                    .collection("Users")
-                    .document(tie_id_number.text.toString())
-                    .set(user)
-                    .addOnSuccessListener {
+                    FirebaseFirestore.getInstance().collection("Users")
+                        .document(tie_email.text.toString())
+                        .get()
+                        .addOnCompleteListener {
+                            if(it.isSuccessful){
 
-                        if (role!! == 0) {
-                            //Students
-                            val direction =
-                                RegistrationFragmentDirections.actionRegistrationFragmentToDashboardFragment()
-                            findNavController().navigate(direction)
-                        } else {
-                            //Professor
-                            val direction =
-                                RegistrationFragmentDirections.actionRegistrationFragmentToTeacherDashboardFragment()
-                            findNavController().navigate(direction)
+                                val doc = it.result!!
+
+                                if(doc.exists()){
+
+                                    makeToast("Your email is already registered. Please try another email address.")
+
+                                } else {
+
+                                    FirebaseFirestore.getInstance()
+                                        .collection("Users")
+                                        .document(tie_email.text.toString())
+                                        .set(user)
+                                        .addOnSuccessListener {
+
+                                            if (role!! == 0) {
+                                                //Students
+                                                val direction =
+                                                    RegistrationFragmentDirections.actionRegistrationFragmentToDashboardFragment()
+                                                findNavController().navigate(direction)
+                                            } else {
+                                                //Professor
+                                                val direction =
+                                                    RegistrationFragmentDirections.actionRegistrationFragmentToTeacherDashboardFragment()
+                                                findNavController().navigate(direction)
+                                            }
+
+                                        }
+                                        .addOnFailureListener {
+                                            Log.d("OnFailure", it.localizedMessage!!)
+
+                                        }
+                                }
+                            }
                         }
 
-                    }
-                    .addOnFailureListener {
-                        Log.d("OnFailure", it.localizedMessage!!)
 
-                    }
+                }
+
+            } else {
+                if (resultName.isValid && resultEmail.isValid && resultContactNo.isValid) {
+
+                    val editor = pref?.edit()
+                    editor?.putBoolean("registered", true)
+                    editor?.putString("studentId", "")
+                    editor?.putString("name", tie_name.text.toString())
+                    editor?.putString("email", tie_email.text.toString())
+                    editor?.putString("phoneNumber", tie_contact_no.text.toString())
+                    editor?.putString("course", "")
+                    editor?.putString("token", token)
+                    editor?.apply()
+
+                    val user = User(
+                        tie_id_number.text.toString(),
+                        tie_name.text.toString(),
+                        tie_email.text.toString(),
+                        tie_contact_no.text.toString(),
+                        if(role == 0) til_course.selectedItem.toString() else "",
+                        role!!,
+                        true,
+                        "Present",
+                        token!!
+                    )
+
+                    FirebaseFirestore.getInstance().collection("Users")
+                        .document(tie_email.text.toString())
+                        .get()
+                        .addOnCompleteListener {
+                            if(it.isSuccessful){
+                                val doc = it.result!!
+
+                                if(doc.exists()){
+                                    makeToast("Your email is already registered. Please try another email address.")
+                                } else {
+
+                                    FirebaseFirestore.getInstance()
+                                        .collection("Users")
+                                        .document(tie_email.text.toString())
+                                        .set(user)
+                                        .addOnSuccessListener {
+
+                                            if (role!! == 0) {
+                                                //Students
+                                                val direction =
+                                                    RegistrationFragmentDirections.actionRegistrationFragmentToDashboardFragment()
+                                                findNavController().navigate(direction)
+                                            } else {
+                                                //Professor
+                                                val direction =
+                                                    RegistrationFragmentDirections.actionRegistrationFragmentToTeacherDashboardFragment()
+                                                findNavController().navigate(direction)
+                                            }
+
+                                        }
+                                        .addOnFailureListener {
+                                            Log.d("OnFailure", it.localizedMessage!!)
+
+                                        }
+                                }
+                            }
+                        }
+
+
+                }
             }
+
         }
 
+        btn_change.setOnClickListener {
+            activity?.supportFragmentManager?.let { dialogFragment.show(it, "dialog") }
+        }
+
+
+        til_course.onItemSelectedListener = this
     }
 
     private fun isInputValid(@NonNull text: String): ValidationResult<String> {
@@ -193,10 +289,25 @@ class RegistrationFragment : Fragment(), SelectionDialogListener {
 
     override fun onSelectStudent() {
         role = 0
+        til_course.visibility = View.VISIBLE
+        til_id.visibility = View.VISIBLE
+
+        tv_user.text = "You're registering as a Student"
     }
 
     override fun onSelectTeacher() {
         role = 1
+        til_course.visibility = View.GONE
+        til_id.visibility = View.GONE
+
+        tv_user.text = "You're registering as a Teacher"
+        tie_id_number.setText("")
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) { }
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            val course = parent?.getItemAtPosition(position).toString()
     }
 
 }

@@ -32,20 +32,6 @@ class LoginFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        /*FirebaseFirestore.getInstance().collection("Users")
-            .whereEqualTo("id", FirebaseAuth.getInstance().uid).query().addOnCompleteListener {
-
-            if (it.isSuccessful) {
-
-                val document = it.getResult()
-
-                document.documents
-
-                val direction = LoginFragmentDirections.actionLoginFragmentToDashboardFragment()
-                findNavController().navigate(direction)
-            }
-        }*/
-
         val pref = activity?.getSharedPreferences("Account", 0)
         val studentId = pref?.getString("studentId", "")
 

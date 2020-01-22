@@ -42,7 +42,7 @@
         android:background="@color/sunshade"
         android:text="Sign in"
         android:textColor="@android:color/white"
-        android:visibility="visible"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

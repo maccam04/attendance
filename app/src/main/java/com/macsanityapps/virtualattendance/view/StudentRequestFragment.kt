@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.macsanityapps.virtualattendance.R
@@ -74,10 +75,10 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener {
                     return@addSnapshotListener
                 }
 
+                dataList.clear()
+
                 for (dc in snapshots!!) {
                     val data = dc.toObject(User::class.java)
-
-                    dataList.clear()
                     dataList.add(data)
                 }
 
@@ -115,12 +116,18 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener {
             }*/
     }
 
-    override fun handleApproved(id: String?, adapterPosition: Int) {
+    override fun handleApproved(user: User, adapterPosition: Int) {
+
+        FirebaseFirestore.getInstance()
+            .collection("Rooms")
+            .document(arguments!!.getString("id"))
+            .update("studentsList", FieldValue.arrayUnion(user.email))
+
 
         val map = HashMap<String, Int>()
         map["type"] = 1
 
-        id?.let {
+        user.id?.let {
             FirebaseFirestore.getInstance()
                 .collection("Rooms")
                 .document(arguments!!.getString("id"))
@@ -137,6 +144,8 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener {
                     makeToast("Something went wrong. Please Try again later.")
                 }
         }
+
+
 
         /*FirebaseFirestore.getInstance()
             .collectionGroup("students")

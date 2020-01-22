@@ -7,6 +7,26 @@
         <item>Absent</item>
     </string-array>
 
+
+    <!-- Civil Engineering (BSCE)
+         Computer Engineering (BSCpE)
+         Marine Engineering (BSMArE)
+         Marine Transportation (BSMT)
+         Computer Science (BSCS)
+         Information Technology (BSIT)
+         Information System (BSIS) -->
+
+    <string-array name="courses">
+        <item>Civil Engineering (BSCE)</item>
+        <item>Computer Engineering (BSCpE)</item>
+        <item>Marine Engineering (BSMArE)</item>
+        <item>Marine Transportation (BSMT)</item>
+        <item>Computer Science (BSCS)</item>
+        <item>Information Technology (BSIT)</item>
+        <item>Information System (BSIS)</item>
+
+    </string-array>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

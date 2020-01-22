@@ -1,27 +1,35 @@
 package com.macsanityapps.virtualattendance.view
 
 
+import android.graphics.Canvas
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.firebase.ui.firestore.FirestoreRecyclerOptions
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.macsanityapps.virtualattendance.R
 import com.macsanityapps.virtualattendance.common.makeToast
 import com.macsanityapps.virtualattendance.data.Rooms
 import com.macsanityapps.virtualattendance.data.User
-
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 
 
 /**
  * A simple [Fragment] subclass.
  */
-class DashboardFragment : Fragment() {
+class DashboardFragment : Fragment(), RoomsAdapter.RoomListener {
+
+    private var roomsAdapter: RoomsAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,6 +39,12 @@ class DashboardFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
+        (activity as AppCompatActivity).supportActionBar?.show()
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(false)
+        (activity as AppCompatActivity).supportActionBar?.title = "Dashboard"
+
+
         return inflater.inflate(
             R.layout.fragment_dashboard,
             container,
@@ -38,10 +52,15 @@ class DashboardFragment : Fragment() {
         )
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        //THIS IS IMPORTANT!!!
+        rv_rooms.adapter = null
+    }
+
     override fun onStart() {
         super.onStart()
 
-        (activity as AppCompatActivity).supportActionBar!!.show()
 
     }
 
@@ -53,24 +72,23 @@ class DashboardFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
-        when (item.itemId) {
-          R.id.action_add -> {
+        return when (item.itemId) {
+            R.id.action_add -> {
                 val dir =
                     DashboardFragmentDirections.actionDashboardFragmentToUpdateProfileFragment()
                 findNavController().navigate(dir)
-                return true
+                true
             }
 
-            else -> return super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        var i = 1
 
-        iv_add_section.setOnClickListener {
+      /*  iv_add_section.setOnClickListener {
             withEditText()
         }
 
@@ -90,11 +108,90 @@ class DashboardFragment : Fragment() {
         iv_list_section.setOnClickListener {
             val dir = DashboardFragmentDirections.actionDashboardFragmentToAbsenceListFragment()
             findNavController().navigate(dir)
+        }*/
+
+        initRecyclerView()
+
+        fab_add_room_section.setOnClickListener {
+            showAddRoomDialog()
         }
 
     }
 
-    private fun withEditText() {
+    private fun initRecyclerView() {
+
+        val pref = activity?.getSharedPreferences("Account", 0)
+        val email = pref?.getString("emai", "")
+
+        rv_rooms.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
+
+        val query = FirebaseFirestore.getInstance()
+            .collection("Rooms")
+            .whereArrayContains("studentsList", email.toString())
+
+        val options = FirestoreRecyclerOptions.Builder<Rooms>()
+            .setQuery(query, Rooms::class.java)
+            .build()
+
+        roomsAdapter = RoomsAdapter(0, options, this)
+        rv_rooms.adapter = roomsAdapter
+
+        roomsAdapter!!.startListening()
+
+
+        val itemTouchHelper = ItemTouchHelper(simpleCallback)
+        itemTouchHelper.attachToRecyclerView(rv_rooms)
+
+    }
+
+    private val simpleCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean {
+            return false
+
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            val notesHelper = viewHolder as RoomsAdapter.NoteViewHolder
+            notesHelper.deleteItem()
+        }
+
+        override fun onChildDraw(
+            c: Canvas,
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            dX: Float,
+            dY: Float,
+            actionState: Int,
+            isCurrentlyActive: Boolean
+        ) {
+            RecyclerViewSwipeDecorator.Builder(
+                c,
+                recyclerView,
+                viewHolder,
+                dX,
+                dY,
+                actionState,
+                isCurrentlyActive
+            )
+                .addBackgroundColor(
+                    ContextCompat.getColor(
+                        activity!!,
+                        R.color.colorPrimaryDark
+                    )
+                )
+                .addActionIcon(R.mipmap.ic_delete)
+                .create()
+                .decorate()
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+        }
+
+    }
+
+    private fun showAddRoomDialog() {
 
         val builder = AlertDialog.Builder(activity!!)
         val inflater = layoutInflater
@@ -200,6 +297,19 @@ class DashboardFragment : Fragment() {
 
         }
         builder.show()
+    }
+
+    override fun handleViewMap(snapshot: DocumentSnapshot) {
+        val data = snapshot.toObject(Rooms::class.java)
+        findNavController().navigate(DashboardFragmentDirections.actionDashboardFragmentToStudentSeatMapFragment(data?.id!!, data?.desc))
+    }
+
+    override fun handleEditNote(snapshot: DocumentSnapshot) {
+
+    }
+
+    override fun handleDeleteItem(snapshot: DocumentSnapshot) {
+
     }
 
 }

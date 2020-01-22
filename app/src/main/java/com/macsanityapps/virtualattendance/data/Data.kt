@@ -9,13 +9,10 @@ import com.google.gson.annotations.Expose
 data class Rooms(
     val id: String = "",
     val course: String = "",
-    val profId: String = "",
+    val email: String = "",
     val desc: String = "",
-    val students: List<User>? = emptyList()
-
-) {
-    constructor() : this("", "", "", "", emptyList())
-}
+    val studentsList: List<String>? = emptyList()
+)
 
 data class User(
     val id: String?,
@@ -52,6 +49,8 @@ data class Attendance(
     val userId: String = "",
     val present: Boolean = false
 )
+
+data class AttendanceStatus(val date: String = "")
 
 
 data class NotificationResponse(

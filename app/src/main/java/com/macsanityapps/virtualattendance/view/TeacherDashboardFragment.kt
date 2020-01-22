@@ -106,9 +106,9 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
             .joinToString("")
 
         val pref = activity?.getSharedPreferences("Account", 0)
-        val studentId = pref?.getString("studentId", "")
+        val email = pref?.getString("email", "")
 
-        val rooms = Rooms(randomString, "", studentId!!, text)
+        val rooms = Rooms(randomString, "", email!!, text, mutableListOf())
 
         FirebaseFirestore.getInstance()
             .collection("Rooms")
@@ -119,7 +119,6 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
             }
             .addOnFailureListener {
                 Log.d("OnFailure", it.localizedMessage!!)
-
             }
 
     }
@@ -127,13 +126,13 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
     private fun initRecyclerView() {
 
         val pref = activity?.getSharedPreferences("Account", 0)
-        val studentId = pref?.getString("studentId", "")
+        val email = pref?.getString("email", "")
 
         rv_rooms.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
 
         val query = FirebaseFirestore.getInstance()
             .collection("Rooms")
-            .whereEqualTo("profId", studentId)
+            .whereEqualTo("email", email)
 
         val options = FirestoreRecyclerOptions.Builder<Rooms>()
             .setQuery(query, Rooms::class.java)

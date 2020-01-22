@@ -2,49 +2,44 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.DashboardFragment">
+    tools:context=".view.TeacherDashboardFragment">
 
-    <ImageView
-        android:id="@+id/iv_add_section"
-        android:layout_width="139dp"
-        android:layout_height="241dp"
-        android:src="@drawable/addsection"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_leave_section"
-        app:layout_constraintEnd_toStartOf="@+id/iv_leave_section"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/iv_leave_section" />
 
-    <ImageView
-        android:id="@+id/iv_leave_section"
-        android:layout_width="137dp"
-        android:layout_height="234dp"
-        android:layout_marginTop="32dp"
-        android:src="@drawable/leavesection"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_rooms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/iv_add_section"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/iv_list_section"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:layout_marginTop="32dp"
-        android:src="@drawable/absences"
-        app:layout_constraintEnd_toEndOf="@+id/iv_leave_section"
-        app:layout_constraintStart_toStartOf="@+id/iv_leave_section"
-        app:layout_constraintTop_toBottomOf="@+id/iv_leave_section" />
 
-    <ImageView
-        android:id="@+id/iv_list_absence"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:layout_marginTop="32dp"
-        android:src="@drawable/listsection"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_list_section"
-        app:layout_constraintEnd_toEndOf="@+id/iv_add_section"
-        app:layout_constraintStart_toStartOf="@+id/iv_add_section"
-        app:layout_constraintTop_toBottomOf="@+id/iv_add_section" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_room_section"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        android:tint="@android:color/white"
+        android:src="@mipmap/ic_add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No room found."
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

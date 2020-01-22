@@ -30,8 +30,7 @@ class RoomsAdapter(
         when(type){
 
             0 -> {
-                holder.btnViewStudent.text = "Apply"
-                holder.btnViewSeatMap.visibility = View.GONE
+                holder.btnViewStudent.visibility = View.GONE
             }
 
         }

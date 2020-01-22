@@ -27,9 +27,6 @@ import java.util.ArrayList
  */
 class AbsenceListFragment : Fragment() {
 
-    var parentData : MutableList<ParentData> = mutableListOf()
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,32 +45,8 @@ class AbsenceListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val pref = activity?.getSharedPreferences("Account", 0)
-        val id = pref?.getString("studentId", "")
 
-        FirebaseFirestore.getInstance()
-            .collection("Users")
-            .document(id!!)
-            .collection("attendance")
-            .whereEqualTo("present", false)
-            .get()
-            .addOnSuccessListener {
 
-                val childData : MutableList<ChildData> = mutableListOf()
-
-                for (dc in it){
-
-                    val parent = dc.toObject(Attendance::class.java)
-
-                    childData.add(ChildData(parent.date))
-                    parentData.add(ParentData(parent.course, childData))
-
-                    Log.e("Absent TAG", parent.toString())
-                }
-
-            }
-
-        Log.e("Absent TAG", parentData.toString())
     }
 
 }

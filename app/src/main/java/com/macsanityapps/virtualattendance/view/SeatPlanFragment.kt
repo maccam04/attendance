@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.firestore.FirebaseFirestore
+import com.macsanityapps.virtualattendance.R
 import com.macsanityapps.virtualattendance.common.makeToast
 import com.macsanityapps.virtualattendance.data.Attendance
 import com.macsanityapps.virtualattendance.data.NotificationResponse
@@ -55,7 +56,7 @@ class SeatPlanFragment : Fragment(), Callback<String> {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(
-            com.macsanityapps.virtualattendance.R.layout.fragment_seat_plan,
+            R.layout.fragment_seat_plan,
             container,
             false
         )
@@ -67,8 +68,7 @@ class SeatPlanFragment : Fragment(), Callback<String> {
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        (activity as AppCompatActivity).supportActionBar?.title =
-            "Room ${arguments!!.getString("name")}"
+        (activity as AppCompatActivity).supportActionBar?.title = "Room ${arguments!!.getString("name")}"
 
         val rowCount = 5
         val columnCount = 10
@@ -95,8 +95,6 @@ class SeatPlanFragment : Fragment(), Callback<String> {
         val seatArray = generateSample(rowCount, columnCount, rowNames)
         seatView!!.initSeatView(seatArray, rowCount, columnCount, rowNames)
         initSeatView()
-
-        setHasOptionsMenu(true)
 
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -241,6 +239,7 @@ class SeatPlanFragment : Fragment(), Callback<String> {
 
             override fun seatSelected(selectedSeat: Seat, selectedSeats: HashMap<String, Seat>) {
                 index = selectedSeat.columnIndex
+                makeToast(selectedSeat.id!!.toString())
 
                 if (selectedSeat.id!!.toInt() < data.size) {
                     printStudentInfo(data[selectedSeat.id!!.toInt()])
