@@ -38,22 +38,11 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
 
     private var userData: AuthUser? = null
     private var role: Int? = null
-    var token: String? = ""
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        FirebaseInstanceId.getInstance().instanceId
-            .addOnCompleteListener(OnCompleteListener { task ->
-                if (!task.isSuccessful) {
-                    return@OnCompleteListener
-                }
-
-                // Get new Instance ID token
-                token = task.result?.token
-                Log.e("TAG", token)
-            })
 
 
     }
@@ -125,6 +114,9 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                 "Account",
                 0
             )
+
+            val prefs = activity?.getSharedPreferences("Token", 0)
+            val token = prefs?.getString("token", "")
 
             if(role == 0){
                 if (resultName.isValid && resultEmail.isValid && resultContactNo.isValid && resultStundentId.isValid) {

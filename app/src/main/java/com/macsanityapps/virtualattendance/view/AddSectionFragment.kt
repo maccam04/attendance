@@ -76,13 +76,14 @@ class AddSectionFragment : Fragment(), RoomsAdapter.RoomListener {
         val data = snapshot.toObject(Rooms::class.java)
 
         val pref = activity?.getSharedPreferences("Account", 0)
+        val prefs = activity?.getSharedPreferences("Token", 0)
         val bol = pref?.getBoolean("registered", false)
         val email = pref?.getString("emai", "")
         val studentId = pref?.getString("studentId", "")
         val mobileNo = pref?.getString("phoneNumber", "")
         val name = pref?.getString("name", "")
         val cousre = pref?.getString("course", "")
-        val token = pref?.getString("token", "")
+        val token = prefs?.getString("token", "")
 
         val user = User(studentId, name, email, mobileNo, cousre, 0, true, "Present", token!!)
 

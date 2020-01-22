@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
@@ -107,7 +108,7 @@ class StudentSeatMapFragment : Fragment() {
             override fun seatReleased(releasedSeat: Seat, selectedSeats: HashMap<String, Seat>) { }
 
             override fun seatSelected(selectedSeat: Seat, selectedSeats: HashMap<String, Seat>) {
-                makeToast(selectedSeat.id.toString())
+
             }
 
             override fun canSelectSeat(
@@ -189,6 +190,20 @@ class StudentSeatMapFragment : Fragment() {
 
         attendanceAdapter.startListening()
 
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+
+            android.R.id.home -> {
+                activity?.onBackPressed()
+                true
+            }
+
+            else -> {
+                false
+            }
+        }
     }
 
 }

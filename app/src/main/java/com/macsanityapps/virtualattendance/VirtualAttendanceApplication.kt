@@ -1,4 +1,4 @@
-package com.macsanityapps.virtualattendance.view
+package com.macsanityapps.virtualattendance
 
 import android.app.Application
 import android.util.Log
@@ -8,8 +8,14 @@ import com.google.firebase.iid.FirebaseInstanceId
 class VirtualAttendanceApplication : Application() {
 
 
+
     override fun onCreate() {
         super.onCreate()
+
+        val pref = applicationContext.getSharedPreferences(
+            "Token",
+            0
+        )
 
         FirebaseInstanceId.getInstance().instanceId
             .addOnCompleteListener(OnCompleteListener { task ->
@@ -17,7 +23,11 @@ class VirtualAttendanceApplication : Application() {
                     return@OnCompleteListener
                 }
 
-                Log.e("FCM TOKEN ",  task.result?.token)
+                val editor = pref?.edit()
+                editor?.putString("token",  task.result?.token)
+
+                Log.e("FCM TOKEN ", task.result?.token)
+
             })
     }
 }
