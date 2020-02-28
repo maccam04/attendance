@@ -1,5 +1,6 @@
 package com.macsanityapps.virtualattendance.util
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -10,6 +11,7 @@ import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -17,82 +19,53 @@ import com.macsanityapps.virtualattendance.R
 
 class MessagingService : FirebaseMessagingService() {
 
+    companion object {
+
+        private val TAG = MessagingService::class.java.canonicalName
+    }
+
+    var notificationManager : NotificationManagerCompat? = null;
+
+    override fun onCreate() {
+        super.onCreate()
+
+        notificationManager = NotificationManagerCompat.from(this)
+
+        createNotification()
+    }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
 
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.from!!)
+        Log.d(TAG, "From: " + remoteMessage.data!!)
 
-        // Check if message contains a data payload.
-
-
-        sendNotification(remoteMessage.data)
-        // Check if message contains a notification payload.
-        if (remoteMessage.notification != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.notification!!.body!!)
-        }
+        showNotification(remoteMessage.data["title"].toString(), remoteMessage.data["content"].toString())
 
     }
 
-    private fun sendNotification(data: MutableMap<String, String>) {
-        //**add this line**
 
-      /*  val requestID = System.currentTimeMillis().toInt()
-        intent.action = "sendByNotif"
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        //intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        val pendingIntent = PendingIntent.getActivity(
-            this, requestID *//* Request code *//*, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )*/
+    private fun createNotification(){
 
-        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.O){
+            val channel = NotificationChannel("attendanceChannel", "Test Channel", NotificationManager.IMPORTANCE_HIGH)
 
-        val notificationBuilder: NotificationCompat.Builder
-
-        /* = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_stat_rewards)
-                .setContentTitle(title)
-                .setContentText(messageBody)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setFullScreenIntent(pendingIntent, true)
-                .setContentIntent(pendingIntent);*/
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            notificationBuilder = NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle(data["title"])
-                .setColor(Color.BLUE)
-                .setContentText(data["content"])
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_launcher_foreground))
-
-        } else {
-
-            notificationBuilder = NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle(data["title"])
-                .setContentText(data["content"])
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_launcher_foreground))
-
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
         }
-
-
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(0  /* ID of notification */, notificationBuilder.build())
-        // notificationManager.cancelAll();
     }
 
-    companion object {
+    private fun showNotification(title : String, content : String){
 
-        private val TAG = MessagingService::class.java.canonicalName
+        val notification = NotificationCompat.Builder(this, "attendanceChannel")
+        with(notification){
+            setSmallIcon(R.mipmap.ic_launcher)
+            setContentTitle(title)
+            setContentText(content)
+        }
+
+        notificationManager?.notify(1, notification.build())
     }
 }
 

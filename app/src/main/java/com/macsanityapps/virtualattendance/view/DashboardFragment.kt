@@ -1,35 +1,39 @@
 package com.macsanityapps.virtualattendance.view
 
 
-import android.graphics.Canvas
 import android.os.Bundle
 import android.view.*
 import android.widget.EditText
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.firebase.firestore.DocumentSnapshot
+import androidx.viewpager.widget.ViewPager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.macsanityapps.virtualattendance.R
+import com.macsanityapps.virtualattendance.VirtualAttendanceApplication
+import com.macsanityapps.virtualattendance.common.ValidationResult
+import com.macsanityapps.virtualattendance.common.ValidationRule
 import com.macsanityapps.virtualattendance.common.makeToast
 import com.macsanityapps.virtualattendance.data.Rooms
 import com.macsanityapps.virtualattendance.data.User
-import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
+import com.macsanityapps.virtualattendance.util.BottomNavigationViewPager
 import kotlinx.android.synthetic.main.fragment_dashboard.*
+import org.json.JSONException
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 /**
  * A simple [Fragment] subclass.
  */
-class DashboardFragment : Fragment(), RoomsAdapter.RoomListener {
-
-    private var roomsAdapter: RoomsAdapter? = null
+class DashboardFragment : Fragment(), Callback<String>,
+    BottomNavigationView.OnNavigationItemSelectedListener, ViewPager.OnPageChangeListener {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,13 +41,12 @@ class DashboardFragment : Fragment(), RoomsAdapter.RoomListener {
     ): View? {
         // Inflate the layout for this fragment
 
-        setHasOptionsMenu(true)
+    //    setHasOptionsMenu(true)
 
         (activity as AppCompatActivity).supportActionBar?.show()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(false)
         (activity as AppCompatActivity).supportActionBar?.title = "Dashboard"
-
 
         return inflater.inflate(
             R.layout.fragment_dashboard,
@@ -52,16 +55,12 @@ class DashboardFragment : Fragment(), RoomsAdapter.RoomListener {
         )
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        //THIS IS IMPORTANT!!!
-        rv_rooms.adapter = null
-    }
-
     override fun onStart() {
         super.onStart()
 
+        setupViewPager(viewpager)
 
+        bottom_nav.setOnNavigationItemSelectedListener(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -88,63 +87,37 @@ class DashboardFragment : Fragment(), RoomsAdapter.RoomListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-      /*  iv_add_section.setOnClickListener {
-            withEditText()
-        }
-
-        iv_leave_section.setOnClickListener {
-
-            val dir = DashboardFragmentDirections.actionDashboardFragmentToSectionListFragment()
-            findNavController().navigate(dir)
-
-        }
-        iv_list_absence.setOnClickListener {
-
-            val dir = DashboardFragmentDirections.actionDashboardFragmentToAddSectionFragment()
-            findNavController().navigate(dir)
-        }
-
-        //absent list
-        iv_list_section.setOnClickListener {
-            val dir = DashboardFragmentDirections.actionDashboardFragmentToAbsenceListFragment()
-            findNavController().navigate(dir)
-        }*/
-
-        initRecyclerView()
-
         fab_add_room_section.setOnClickListener {
             showAddRoomDialog()
         }
 
     }
 
-    private fun initRecyclerView() {
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
 
-        val pref = activity?.getSharedPreferences("Account", 0)
-        val email = pref?.getString("emai", "")
+            R.id.home -> {
+                viewpager.currentItem = 0
+                (activity as AppCompatActivity).supportActionBar?.title = "Dashboard"
+                return true
+            }
 
-        rv_rooms.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
+            R.id.settings -> {
+                viewpager.currentItem = 1
+                (activity as AppCompatActivity).supportActionBar?.title = "Settings"
+                return true
+            }
 
-        val query = FirebaseFirestore.getInstance()
-            .collection("Rooms")
-            .whereArrayContains("studentsList", email.toString())
+        }
 
-        val options = FirestoreRecyclerOptions.Builder<Rooms>()
-            .setQuery(query, Rooms::class.java)
-            .build()
-
-        roomsAdapter = RoomsAdapter(0, options, this)
-        rv_rooms.adapter = roomsAdapter
-
-        roomsAdapter!!.startListening()
-
-
-        val itemTouchHelper = ItemTouchHelper(simpleCallback)
-        itemTouchHelper.attachToRecyclerView(rv_rooms)
+        return false
 
     }
 
-    private val simpleCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+
+
+
+    /*private val simpleCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
         override fun onMove(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder,
@@ -189,7 +162,7 @@ class DashboardFragment : Fragment(), RoomsAdapter.RoomListener {
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
         }
 
-    }
+    }*/
 
     private fun showAddRoomDialog() {
 
@@ -201,115 +174,179 @@ class DashboardFragment : Fragment(), RoomsAdapter.RoomListener {
         builder.setView(dialogLayout)
         builder.setPositiveButton("Submit") { _, i ->
 
-            FirebaseFirestore.getInstance()
-                .collection("Rooms")
-                .whereEqualTo("id", editText.text.toString())
-                .get()
-                .addOnSuccessListener {
 
-                    val pref = activity?.getSharedPreferences("Account", 0)
-                    val bol = pref?.getBoolean("registered", false)
-                    val email = pref?.getString("emai", "")
-                    val studentId = pref?.getString("studentId", "")
-                    val mobileNo = pref?.getString("phoneNumber", "")
-                    val name = pref?.getString("name", "")
-                    val cousre = pref?.getString("course", "")
+            val resultRoom = isInputValid(editText.text.toString())
 
-                    val user = User(studentId, name, email, mobileNo, cousre, 0, bol)
+            if (!resultRoom.isValid) {
+                editText.error = resultRoom.reason
+            } else editText.error = ""
 
-                    FirebaseFirestore.getInstance()
-                        .collection("Rooms")
-                        .document("${editText.text}")
-                        .collection("students")
-                        .document("$studentId")
-                        .get()
-                        .addOnSuccessListener {
-                            if(it.exists()){
-                                makeToast("You're already sent a request to this room!. ")
-                            } else {
+
+            if (resultRoom.isValid) {
+                FirebaseFirestore.getInstance()
+                    .collection("Rooms")
+                    .whereEqualTo("id", editText.text.toString())
+                    .get()
+                    .addOnSuccessListener {
+
+                        val pref = activity?.getSharedPreferences("Account", 0)
+                        val bol = pref?.getBoolean("registered", false)
+                        val email = pref?.getString("email", "")
+                        val studentId = pref?.getString("studentId", "")
+                        val mobileNo = pref?.getString("phoneNumber", "")
+                        val name = pref?.getString("name", "")
+                        val cousre = pref?.getString("course", "")
+
+                        val user = User(studentId, name, email, mobileNo, cousre, 0, true, "Present",
+                                (activity?.application as VirtualAttendanceApplication).giveToken())
+
+
+                        FirebaseFirestore.getInstance()
+                            .collection("Rooms")
+                            .document("${editText.text}")
+                            .get()
+                            .addOnSuccessListener {
+
+                                val rooms = it.toObject(Rooms::class.java)
                                 FirebaseFirestore.getInstance()
                                     .collection("Rooms")
                                     .document("${editText.text}")
                                     .collection("students")
                                     .document("$studentId")
-                                    .set(user)
+                                    .get()
                                     .addOnSuccessListener {
-                                        val builders = android.app.AlertDialog.Builder(activity)
+                                        if (it.exists()) {
+                                            makeToast("You're already sent a request to this room!. ")
+                                        } else {
+                                            FirebaseFirestore.getInstance()
+                                                .collection("Rooms")
+                                                .document("${editText.text}")
+                                                .collection("students")
+                                                .document("$studentId")
+                                                .set(user)
+                                                .addOnSuccessListener {
 
-                                        // Set the alert dialog title
-                                        builders.setTitle("Request Sent!")
+                                                    try {
 
-                                        // Display a message on alert dialog
-                                        builders.setMessage("Please wait for your professor to accept your request!")
+                                                        val message = "{ \"data\": \n" +
+                                                                "   { \"title\": \"Status Update! \", \n" +
+                                                                "    \"content\" : \"Hi professor, ${name} a new student has applied on your section.\",\n" +
+                                                                "    \"imageUrl\": \"http://h5.4j.com/thumb/Ninja-Run.jpg\", \n" +
+                                                                "    \"gameUrl\": \"https://h5.4j.com/Ninja-Run/index.php?pubid=noad\" \n" +
+                                                                "   }, \n" +
+                                                                "\n" +
+                                                                " \"to\": \"${rooms?.token}\"\n" +
+                                                                "}"
 
-                                        // Set a positive button and its click listener on alert dialog
-                                        builders.setPositiveButton("OK"){ _, _ ->
+                                                        val userCall = (activity?.application as VirtualAttendanceApplication).getApi().sendData(message)
+                                                        userCall.enqueue(this)
+
+                                                    } catch (e: JSONException) {
+                                                        e.printStackTrace()
+                                                    }
+
+
+                                                    val builders = android.app.AlertDialog.Builder(activity)
+
+                                                    // Set the alert dialog title
+                                                    builders.setTitle("Request Sent!")
+
+                                                    // Display a message on alert dialog
+                                                    builders.setMessage("Please wait for your professor to accept your request!")
+
+                                                    // Set a positive button and its click listener on alert dialog
+                                                    builders.setPositiveButton("OK") { _, _ -> }
+
+                                                    // Finally, make the alert dialog using builder
+                                                    val dialog: android.app.AlertDialog = builders.create()
+
+                                                    // Display the alert dialog on app interface
+                                                    dialog.show()
+                                                }
+                                                .addOnFailureListener {
+
+                                                }
 
                                         }
-
-                                        // Finally, make the alert dialog using builder
-                                        val dialog: android.app.AlertDialog = builders.create()
-
-                                        // Display the alert dialog on app interface
-                                        dialog.show()
-                                    }
-                                    .addOnFailureListener {
-
                                     }
 
-                            }
-                        }
-
-
-
-                    /*FirebaseFirestore.getInstance()
-                        .collection("room${editText.text}")
-                        .document("${editText.text}")
-                        .set(user)
-                        .addOnSuccessListener {
-                            val builders = android.app.AlertDialog.Builder(activity)
-
-                            // Set the alert dialog title
-                            builders.setTitle("Request Sent!")
-
-                            // Display a message on alert dialog
-                            builders.setMessage("Please wait for your professor to accept your request!")
-
-                            // Set a positive button and its click listener on alert dialog
-                            builders.setPositiveButton("OK"){ _, _ ->
 
                             }
 
-                            // Finally, make the alert dialog using builder
-                            val dialog: android.app.AlertDialog = builders.create()
-
-                            // Display the alert dialog on app interface
-                            dialog.show()
-                        }
-                        .addOnFailureListener {
-                            Log.d("OnFailure", it.localizedMessage!!)
-
-                        }*/
-                }.addOnFailureListener {
-                    makeToast("Sorry, No room found.")
-                }
 
 
+                        /*FirebaseFirestore.getInstance()
+                            .collection("room${editText.text}")
+                            .document("${editText.text}")
+                            .set(user)
+                            .addOnSuccessListener {
+                                val builders = android.app.AlertDialog.Builder(activity)
+
+                                // Set the alert dialog title
+                                builders.setTitle("Request Sent!")
+
+                                // Display a message on alert dialog
+                                builders.setMessage("Please wait for your professor to accept your request!")
+
+                                // Set a positive button and its click listener on alert dialog
+                                builders.setPositiveButton("OK"){ _, _ ->
+
+                                }
+
+                                // Finally, make the alert dialog using builder
+                                val dialog: android.app.AlertDialog = builders.create()
+
+                                // Display the alert dialog on app interface
+                                dialog.show()
+                            }
+                            .addOnFailureListener {
+                                Log.d("OnFailure", it.localizedMessage!!)
+
+                            }*/
+                    }.addOnFailureListener {
+                        makeToast("Sorry, No room found.")
+                    }
+            }
         }
         builder.show()
     }
 
-    override fun handleViewMap(snapshot: DocumentSnapshot) {
-        val data = snapshot.toObject(Rooms::class.java)
-        findNavController().navigate(DashboardFragmentDirections.actionDashboardFragmentToStudentSeatMapFragment(data?.id!!, data?.desc))
+
+    private fun isInputValid(@NonNull text: String): ValidationResult<String> {
+        return ValidationRule.isNotEmpty(text)
     }
 
-    override fun handleEditNote(snapshot: DocumentSnapshot) {
+    override fun onFailure(call: Call<String>, t: Throwable) {}
+
+    override fun onResponse(call: Call<String>, response: Response<String>) {}
+
+    private fun setupViewPager(viewPager: ViewPager) {
+
+        viewPager.offscreenPageLimit = 1
+
+        val adapter = BottomNavigationViewPager(childFragmentManager).apply {
+            addFragment(StudentHomeFragment())
+            addFragment(SettingsFragment())
+        }
+
+        viewPager.adapter = adapter
+        viewPager.currentItem = 0
+        viewPager.addOnPageChangeListener(this)
+    }
+
+    override fun onPageScrollStateChanged(state: Int) {
 
     }
 
-    override fun handleDeleteItem(snapshot: DocumentSnapshot) {
+    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
 
     }
+
+    override fun onPageSelected(position: Int) {
+
+    }
+
+
+
 
 }

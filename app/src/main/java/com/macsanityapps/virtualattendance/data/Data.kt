@@ -11,6 +11,7 @@ data class Rooms(
     val course: String = "",
     val email: String = "",
     val desc: String = "",
+    val token: String = "",
     val studentsList: List<String>? = emptyList()
 )
 
@@ -23,7 +24,7 @@ data class User(
     val type: Int? = 0,
     val register: Boolean? = false,
     val status: String = "Present",
-    val token : String = ""
+    val token : String? = ""
 
 ) {
     constructor() : this("", "", "", "", "", 0, false)

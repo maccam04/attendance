@@ -19,6 +19,7 @@ import com.macsanityapps.virtualattendance.common.RC_SIGN_IN
 import com.macsanityapps.virtualattendance.data.AuthUser
 import kotlinx.android.synthetic.main.fragment_login.*
 import com.macsanityapps.virtualattendance.data.User
+import kotlinx.android.synthetic.main.fragment_registration.*
 
 
 /**
@@ -33,11 +34,12 @@ class LoginFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         val pref = activity?.getSharedPreferences("Account", 0)
-        val studentId = pref?.getString("studentId", "")
+        val email = pref?.getString("email", "")
 
         FirebaseFirestore.getInstance()
             .collection("Users")
-            .whereEqualTo("id", if(studentId != "") studentId else "")
+            .whereEqualTo("email", if(email != "") email else "")
+            .whereEqualTo("register", true)
             .get()
             .addOnSuccessListener {
 
@@ -97,7 +99,6 @@ class LoginFragment : Fragment() {
 
         (activity as AppCompatActivity).supportActionBar!!.hide()
 
-
         btn_signin.setOnClickListener {
             startSignInFlow()
         }
@@ -111,7 +112,7 @@ class LoginFragment : Fragment() {
 
 
     private fun startSignInFlow() {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken("793352634157-8r45m1pjpra5830inm7tj36sefv76fpb.apps.googleusercontent.com")
             .requestEmail()
             .build()
@@ -132,12 +133,69 @@ class LoginFragment : Fragment() {
                 val account: GoogleSignInAccount? = task.getResult(ApiException::class.java)
 
 
-                val direction =
-                    LoginFragmentDirections.actionLoginFragmentToRegistrationFragment(
-                        AuthUser(account?.id!!, account.displayName!!, account.email!!)
-                    )
+                val pref = activity?.getSharedPreferences(
+                    "Account",
+                    0
+                )
 
-                findNavController().navigate(direction)
+                val prefs = activity?.getSharedPreferences("Token", 0)
+                val token = prefs?.getString("token", "")
+
+
+                FirebaseFirestore.getInstance()
+                    .collection("Users")
+                    .document(account!!.email!!)
+                    .get()
+                    .addOnSuccessListener {
+
+                        if(it.exists()){
+                            val user: User = it.toObject(User::class.java)!!
+                            val editor = pref?.edit()
+                            user.register?.let { it1 -> editor?.putBoolean("registered", it1) }
+                            editor?.putString("studentId", user.id)
+                            editor?.putString("name", user.name)
+                            editor?.putString("email", user.email)
+                            editor?.putString("phoneNumber", user.mobileNo)
+                            editor?.putString("course", user.course)
+                            editor?.putString("token", token)
+                            editor?.putString("type", user.type.toString())
+                            editor?.apply()
+
+
+                            val map = HashMap<String, Boolean>()
+                            map["register"] = true
+
+                            FirebaseFirestore.getInstance()
+                                .collection("Users")
+                                .document("${user.email}")
+                                .update(map as Map<String, Boolean>)
+                                .addOnSuccessListener {}
+
+
+                            when(user.type){
+                                0 -> {
+                                    val direction = LoginFragmentDirections.actionLoginFragmentToDashboardFragment()
+                                    findNavController().navigate(direction)
+                                }
+
+                                1 -> {
+                                    val direction =
+                                        LoginFragmentDirections.actionLoginFragmentToTeacherDashboardFragment()
+                                    findNavController().navigate(direction)
+                                }
+                            }
+
+                        } else {
+
+                            val direction = LoginFragmentDirections.actionLoginFragmentToRegistrationFragment(
+                                AuthUser(account?.id!!, account.displayName!!, account.email!!))
+                            findNavController().navigate(direction)
+
+                        }
+
+                    }
+
+
 
             } catch (exception: Exception) {
                 Log.d("LOGIN", exception.toString())

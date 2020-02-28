@@ -1,5 +1,6 @@
 package com.macsanityapps.virtualattendance.common
 
+
 internal const val LOGIN_ERROR = "Error retrieving user."
 internal const val LOADING = "Loading..."
 internal const val LOGOUT_ERROR = "Error logging out user."
@@ -23,3 +24,4 @@ internal const val ANTENNA_LOOP = "antenna_loop_fast"
  * be a specific value.
  */
 internal const val RC_SIGN_IN = 1337
+

@@ -75,6 +75,10 @@ class RoomsAdapter(
         }
     }
 
+    fun refresh(){
+        notifyDataSetChanged()
+    }
+
     interface RoomListener {
         fun handleViewMap(snapshot: DocumentSnapshot)
         fun handleEditNote(snapshot: DocumentSnapshot)

@@ -38,7 +38,7 @@ class AbsenceListFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        (activity as AppCompatActivity).supportActionBar!!.show()
+      //  (activity as AppCompatActivity).supportActionBar!!.show()
 
     }
 

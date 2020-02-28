@@ -31,7 +31,35 @@
         {
           "current_key": "AIzaSyAn0qSkvQeblHWly5M3mLCeZmYv_mXBzSw"
         }
-
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "793352634157-8r45m1pjpra5830inm7tj36sefv76fpb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:793352634157:android:8c8988bee7d13bddd31da4",
+        "android_client_info": {
+          "package_name": "com.macsanityapps.virtualattendance.demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "793352634157-8r45m1pjpra5830inm7tj36sefv76fpb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAn0qSkvQeblHWly5M3mLCeZmYv_mXBzSw"
+        }
       ],
       "services": {
         "appinvite_service": {

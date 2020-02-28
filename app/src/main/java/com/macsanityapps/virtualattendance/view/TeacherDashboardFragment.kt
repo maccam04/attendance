@@ -1,37 +1,38 @@
 package com.macsanityapps.virtualattendance.view
 
 
-import android.graphics.Canvas
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.EditText
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.firestore.DocumentSnapshot
+import androidx.viewpager.widget.ViewPager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.macsanityapps.virtualattendance.R
+import com.macsanityapps.virtualattendance.VirtualAttendanceApplication
+import com.macsanityapps.virtualattendance.common.ValidationResult
+import com.macsanityapps.virtualattendance.common.ValidationRule
 import com.macsanityapps.virtualattendance.common.makeToast
 import com.macsanityapps.virtualattendance.data.Rooms
-import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
+import com.macsanityapps.virtualattendance.util.BottomNavigationViewPager
+import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.fragment_teacher_dashboard.*
+import kotlinx.android.synthetic.main.fragment_teacher_dashboard.bottom_nav
+import kotlinx.android.synthetic.main.fragment_teacher_dashboard.viewpager
 
 /**
  * A simple [Fragment] subclass.
  */
-class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
+class TeacherDashboardFragment : Fragment(), ViewPager.OnPageChangeListener,
+    BottomNavigationView.OnNavigationItemSelectedListener {
 
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-    private var roomsAdapter: RoomsAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,7 +40,7 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
     ): View? {
         // Inflate the layout for this fragment
 
-        setHasOptionsMenu(true)
+    //    setHasOptionsMenu(true)
 
         return inflater.inflate(R.layout.fragment_teacher_dashboard, container, false)
     }
@@ -47,6 +48,7 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        (activity as AppCompatActivity).supportActionBar?.show()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(false)
         (activity as AppCompatActivity).supportActionBar?.title = "Dashboard"
@@ -54,7 +56,7 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
     }
     override fun onStart() {
         super.onStart()
-        (activity as AppCompatActivity).supportActionBar!!.show()
+        //(activity as AppCompatActivity).supportActionBar!!.show()
 
         fab_add_room.setOnClickListener {
 
@@ -65,15 +67,27 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
             val editText = dialogLayout.findViewById<EditText>(R.id.et_room_name)
             builder.setView(dialogLayout)
             builder.setPositiveButton("Submit") { dialogInterface, i ->
-                createRoom(editText.text.toString())
+
+                val resultRoom = isInputValid(editText.text.toString())
+
+                if (!resultRoom.isValid) {
+                    editText.error = resultRoom.reason
+                } else editText.error = ""
+
+
+                if(resultRoom.isValid){
+                    createRoom(editText.text.toString())
+                }
             }
+
             builder.show()
 
 
         }
 
-        initRecyclerView()
+        setupViewPager(viewpager)
 
+        bottom_nav.setOnNavigationItemSelectedListener(this)
 
     }
 
@@ -108,7 +122,7 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
         val pref = activity?.getSharedPreferences("Account", 0)
         val email = pref?.getString("email", "")
 
-        val rooms = Rooms(randomString, "", email!!, text, mutableListOf())
+        val rooms = Rooms(randomString, "", email!!, text, (activity?.application as VirtualAttendanceApplication).giveToken(), mutableListOf())
 
         FirebaseFirestore.getInstance()
             .collection("Rooms")
@@ -123,108 +137,54 @@ class TeacherDashboardFragment : Fragment(), RoomsAdapter.RoomListener {
 
     }
 
-    private fun initRecyclerView() {
-
-        val pref = activity?.getSharedPreferences("Account", 0)
-        val email = pref?.getString("email", "")
-
-        rv_rooms.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
-
-        val query = FirebaseFirestore.getInstance()
-            .collection("Rooms")
-            .whereEqualTo("email", email)
-
-        val options = FirestoreRecyclerOptions.Builder<Rooms>()
-            .setQuery(query, Rooms::class.java)
-            .build()
-
-        roomsAdapter = RoomsAdapter(1, options, this)
-        rv_rooms.adapter = roomsAdapter
-
-        roomsAdapter!!.startListening()
-
-
-        val itemTouchHelper = ItemTouchHelper(simpleCallback)
-        itemTouchHelper.attachToRecyclerView(rv_rooms)
-
+    private fun isInputValid(@NonNull text: String): ValidationResult<String> {
+        return ValidationRule.isNotEmpty(text)
     }
 
-    private val simpleCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder
-        ): Boolean {
-            return false
+    private fun setupViewPager(viewPager: ViewPager) {
 
+        viewPager.offscreenPageLimit = 1
+
+        val adapter = BottomNavigationViewPager(childFragmentManager).apply {
+            addFragment(TeacherHomeFragment())
+            addFragment(SettingsFragment())
         }
 
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        viewPager.adapter = adapter
+        viewPager.currentItem = 0
+        viewPager.addOnPageChangeListener(this)
+    }
 
-            val notesHelper = viewHolder as RoomsAdapter.NoteViewHolder
-            notesHelper.deleteItem()
-        }
-
-        override fun onChildDraw(
-            c: Canvas,
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            dX: Float,
-            dY: Float,
-            actionState: Int,
-            isCurrentlyActive: Boolean
-        ) {
-            RecyclerViewSwipeDecorator.Builder(
-                c,
-                recyclerView,
-                viewHolder,
-                dX,
-                dY,
-                actionState,
-                isCurrentlyActive
-            )
-                .addBackgroundColor(
-                    ContextCompat.getColor(
-                        activity!!,
-                        R.color.colorPrimaryDark
-                    )
-                )
-                .addActionIcon(R.mipmap.ic_delete)
-                .create()
-                .decorate()
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-        }
+    override fun onPageScrollStateChanged(state: Int) {
 
     }
 
-    override fun handleViewMap(snapshot: DocumentSnapshot) {
-        val data = snapshot.toObject(Rooms::class.java)
-        findNavController().navigate(TeacherDashboardFragmentDirections.actionTeacherDashboardFragmentToSeatPlanFragment(data?.id!!, data?.desc))
-    }
-
-    override fun handleEditNote(snapshot: DocumentSnapshot) {
-
-        val data = snapshot.toObject(Rooms::class.java)
-        val direction = TeacherDashboardFragmentDirections.actionTeacherDashboardFragmentToStudentRequestFragment(data?.id!!)
-
-        findNavController().navigate(direction)
-
+    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
 
     }
 
-    override fun handleDeleteItem(snapshot: DocumentSnapshot) {
+    override fun onPageSelected(position: Int) {
 
-        val documentReference = snapshot.reference
-        snapshot.toObject(Rooms::class.java)
+    }
 
-        documentReference.delete()
-            .addOnSuccessListener {
-                Snackbar.make(cl_parent, "Room Deleted", Snackbar.LENGTH_LONG)
-                    .setBackgroundTint(ContextCompat.getColor(activity!!, android.R.color.black))
-                    .setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-                    .show()
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+
+            R.id.home -> {
+                viewpager.currentItem = 0
+                (activity as AppCompatActivity).supportActionBar?.title = "Dashboard"
+                return true
             }
 
+            R.id.settings -> {
+                viewpager.currentItem = 1
+                (activity as AppCompatActivity).supportActionBar?.title = "Settings"
+                return true
+            }
+
+        }
+
+        return false
     }
 
 }

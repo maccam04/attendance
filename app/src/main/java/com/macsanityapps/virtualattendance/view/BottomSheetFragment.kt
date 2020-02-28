@@ -17,15 +17,7 @@ import com.macsanityapps.virtualattendance.data.User
 /**
  * A simple [Fragment] subclass.
  */
-class BottomSheetFragment : BottomSheetDialogFragment(), StudentAdapter.StudentListener {
-    override fun handleApproved(id: User, adapterPosition: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun handleDisapproved(id: String?, adapterPosition: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
+class BottomSheetFragment : BottomSheetDialogFragment() {
 
     private var studentAdapter: StudentAdapter? = null
 

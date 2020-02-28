@@ -6,11 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".view.TeacherDashboardFragment">
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_students"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/inc_empty_state"
+        layout="@layout/layout_empty_state"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.firebase.firestore.FirebaseFirestore
 import com.macsanityapps.virtualattendance.R
 import com.macsanityapps.virtualattendance.common.makeToast
+import com.macsanityapps.virtualattendance.data.ApiService
 import com.macsanityapps.virtualattendance.data.Attendance
 import com.macsanityapps.virtualattendance.data.NotificationResponse
 import com.macsanityapps.virtualattendance.data.User
@@ -109,7 +110,6 @@ class SeatPlanFragment : Fragment(), Callback<String> {
 
         val apiInterface = retrofit.create(ApiService::class.java!!)
 
-
         btn_present.setOnClickListener {
 
             FirebaseFirestore.getInstance()
@@ -175,8 +175,8 @@ class SeatPlanFragment : Fragment(), Callback<String> {
                     try {
 
                         val message = "{ \"data\": \n" +
-                                "   { \"title\": \"You Mark as absent\", \n" +
-                                "    \"content\" : \"Hi ${data[index!!].name} sample mesage here. -Professor\",\n" +
+                                "   { \"title\": \"Status Update!\", \n" +
+                                "    \"content\" : \"Hi ${data[index!!].name} you have been marked as absent by your professor in section ${arguments!!.getString("name")}\",\n" +
                                 "    \"imageUrl\": \"http://h5.4j.com/thumb/Ninja-Run.jpg\", \n" +
                                 "    \"gameUrl\": \"https://h5.4j.com/Ninja-Run/index.php?pubid=noad\" \n" +
                                 "   }, \n" +
@@ -239,7 +239,6 @@ class SeatPlanFragment : Fragment(), Callback<String> {
 
             override fun seatSelected(selectedSeat: Seat, selectedSeats: HashMap<String, Seat>) {
                 index = selectedSeat.columnIndex
-                makeToast(selectedSeat.id!!.toString())
 
                 if (selectedSeat.id!!.toInt() < data.size) {
                     printStudentInfo(data[selectedSeat.id!!.toInt()])
@@ -344,21 +343,6 @@ class SeatPlanFragment : Fragment(), Callback<String> {
     private fun getCurrentDate(): String {
         val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
         return sdf.format(Date())
-    }
-
-    interface ApiService {
-
-        companion object {
-            var URL_BASE = "https://fcm.googleapis.com/"
-        }
-
-        @Headers(
-            "Authorization: key=AIzaSyBQlmsQSoQwYGW_LDVBcqSlOQx16ElW-nk",
-            "Content-Type: application/json"
-        )
-        @POST("fcm/send")
-        fun sendData(@Body notif: String): Call<String>
-
     }
 
     override fun onFailure(call: Call<String>, t: Throwable) {

@@ -1,6 +1,7 @@
 package com.macsanityapps.virtualattendance.view
 
 
+import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,6 +23,7 @@ import com.macsanityapps.virtualattendance.common.ValidationRule
 import com.macsanityapps.virtualattendance.common.makeToast
 import com.macsanityapps.virtualattendance.data.AuthUser
 import com.macsanityapps.virtualattendance.data.User
+import com.macsanityapps.virtualattendance.util.ProgressDialog
 import kotlinx.android.synthetic.main.fragment_registration.*
 import kotlinx.android.synthetic.main.fragment_registration.btn_register
 import kotlinx.android.synthetic.main.fragment_registration.tie_contact_no
@@ -38,12 +40,13 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
 
     private var userData: AuthUser? = null
     private var role: Int? = null
-
-
+    private lateinit var dialog : Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+        dialog = ProgressDialog.progressDialog(activity!!)
 
     }
 
@@ -83,7 +86,6 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
  
         btn_register.setOnClickListener {
 
-
             val resultName = isInputValid(tie_name.text.toString())
             val resultContactNo = validatePhone(tie_contact_no.text.toString())
             val resultEmail = isInputValid(tie_email.text.toString())
@@ -101,9 +103,11 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                 til_contact.error = resultContactNo.reason
             } else til_contact.error = ""
 
-            if (!resultStundentId.isValid) {
-                til_id.error = resultStundentId.reason
-            } else til_id.error = ""
+            if(role == 0){
+                if (!resultStundentId.isValid) {
+                    til_id.error = resultStundentId.reason
+                } else til_id.error = ""
+            }
 
           /*  if (!resultCourse.isValid) {
                 til_course.error = resultCourse.reason
@@ -119,7 +123,9 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
             val token = prefs?.getString("token", "")
 
             if(role == 0){
+
                 if (resultName.isValid && resultEmail.isValid && resultContactNo.isValid && resultStundentId.isValid) {
+                    dialog.show()
 
                     val editor = pref?.edit()
                     editor?.putBoolean("registered", true)
@@ -128,7 +134,8 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                     editor?.putString("email", tie_email.text.toString())
                     editor?.putString("phoneNumber", tie_contact_no.text.toString())
                     editor?.putString("course", if(role == 0) til_course.selectedItem.toString() else "")
-                    editor?.putString("token", token)
+                    editor?.putString("token", FirebaseInstanceId.getInstance().token)
+                    editor?.putString("type", role!!.toString())
                     editor?.apply()
 
                     val user = User(
@@ -140,7 +147,7 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                         role!!,
                         true,
                         "Present",
-                        token!!
+                        FirebaseInstanceId.getInstance().token!!
                     )
 
                     FirebaseFirestore.getInstance().collection("Users")
@@ -175,10 +182,12 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                                                 findNavController().navigate(direction)
                                             }
 
+                                            dialog.dismiss()
+
                                         }
                                         .addOnFailureListener {
                                             Log.d("OnFailure", it.localizedMessage!!)
-
+                                            dialog.dismiss()
                                         }
                                 }
                             }
@@ -188,7 +197,10 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                 }
 
             } else {
+
                 if (resultName.isValid && resultEmail.isValid && resultContactNo.isValid) {
+
+                    dialog.show()
 
                     val editor = pref?.edit()
                     editor?.putBoolean("registered", true)
@@ -197,7 +209,8 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                     editor?.putString("email", tie_email.text.toString())
                     editor?.putString("phoneNumber", tie_contact_no.text.toString())
                     editor?.putString("course", "")
-                    editor?.putString("token", token)
+                    editor?.putString("token", FirebaseInstanceId.getInstance().token)
+                    editor?.putString("type", role.toString())
                     editor?.apply()
 
                     val user = User(
@@ -209,7 +222,7 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                         role!!,
                         true,
                         "Present",
-                        token!!
+                        FirebaseInstanceId.getInstance().token
                     )
 
                     FirebaseFirestore.getInstance().collection("Users")
@@ -228,6 +241,7 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                                         .document(tie_email.text.toString())
                                         .set(user)
                                         .addOnSuccessListener {
+                                            dialog.dismiss()
 
                                             if (role!! == 0) {
                                                 //Students
@@ -244,12 +258,11 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
                                         }
                                         .addOnFailureListener {
                                             Log.d("OnFailure", it.localizedMessage!!)
-
+                                            dialog.dismiss()
                                         }
                                 }
                             }
                         }
-
 
                 }
             }
@@ -259,7 +272,6 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
         btn_change.setOnClickListener {
             activity?.supportFragmentManager?.let { dialogFragment.show(it, "dialog") }
         }
-
 
         til_course.onItemSelectedListener = this
     }
@@ -283,8 +295,7 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
         role = 0
         til_course.visibility = View.VISIBLE
         til_id.visibility = View.VISIBLE
-
-        tv_user.text = "You're registering as a Student"
+        tv_user.text = "Register as a Student"
     }
 
     override fun onSelectTeacher() {
@@ -292,7 +303,7 @@ class RegistrationFragment : Fragment(), SelectionDialogListener,
         til_course.visibility = View.GONE
         til_id.visibility = View.GONE
 
-        tv_user.text = "You're registering as a Teacher"
+        tv_user.text = "Register as a Teacher"
         tie_id_number.setText("")
     }
 

@@ -38,10 +38,10 @@ class StudentSeatMapFragment : Fragment() {
     private val columnCount = 10
     private val rowNames: HashMap<String, String> = HashMap()
 
-    private var data: MutableList<User> = mutableListOf()
-    private var parentData : MutableList<ParentData> = mutableListOf()
+    private var data: MutableList<Rooms> = mutableListOf()
+    private var parentData: MutableList<ParentData> = mutableListOf()
 
-    private var index : Int? = 0
+    private var index: Int? = null
 
     private lateinit var attendanceAdapter: AttendanceAdapter
 
@@ -69,43 +69,35 @@ class StudentSeatMapFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.title = "Room ${arguments!!.getString("name")}"
 
         val pref = activity?.getSharedPreferences("Account", 0)
-        val email = pref?.getString("emai", "")
+        val name = pref?.getString("name", "")
 
 
         FirebaseFirestore.getInstance()
             .collection("Rooms")
             .document(arguments!!.getString("id"))
-            .collection("students")
-            .whereEqualTo("type", 1)
             .get().addOnSuccessListener {
 
-                val userData = it.toObjects(User::class.java)
-                data.addAll(userData)
-                index  = data.indexOfFirst { it.email == email }
-                Log.i("TAG", "Data Comes")
+                val rooms = it.toObject(Rooms::class.java)
 
+                index = rooms!!.studentsList!!.indexOfFirst { e -> e == name }
+                Log.e("TAG", "Data Comes $index ")
+
+                activity!!.runOnUiThread {
+                    val seatArray = generatePreLoadData(index!!, rowCount, columnCount, rowNames)
+                    seatView!!.initSeatView(seatArray, rowCount, columnCount, rowNames)
+                    initSeatView()
+                    Log.e("TAG", "Render Data Comes ${data.indexOfFirst { it.email == name }}")
+
+                    generateAttendance()
+                }
             }
-
-        CoroutineScope(Dispatchers.IO).launch {
-            delay(TimeUnit.SECONDS.toMillis(3))
-            withContext(Dispatchers.Main) {
-                Log.i("TAG", "this will be called after 3 seconds")
-
-            }
-        }
-
-        val seatArray = generatePreLoadData(rowCount, columnCount, rowNames)
-        seatView!!.initSeatView(seatArray, rowCount, columnCount, rowNames)
-        initSeatView()
-
-        generateAttendance()
     }
 
-    private fun initSeatView(){
+    private fun initSeatView() {
 
         seatView.seatClickListener = object : SeatViewListener {
 
-            override fun seatReleased(releasedSeat: Seat, selectedSeats: HashMap<String, Seat>) { }
+            override fun seatReleased(releasedSeat: Seat, selectedSeats: HashMap<String, Seat>) {}
 
             override fun seatSelected(selectedSeat: Seat, selectedSeats: HashMap<String, Seat>) {
 
@@ -119,9 +111,9 @@ class StudentSeatMapFragment : Fragment() {
             }
         }
 
-        seatView.config.zoomActive = true
+        seatView.config.zoomActive = false
         seatView.config.cinemaScreenViewSide = SeatViewConfig.SIDE_TOP
-        seatView.config.zoomAfterClickActive = true
+        seatView.config.zoomAfterClickActive = false
         seatView.config.cinemaScreenViewText = "Front"
         seatView.config.seatNamesBarActive = false
         seatView.invalidate()
@@ -129,6 +121,7 @@ class StudentSeatMapFragment : Fragment() {
     }
 
     private fun generatePreLoadData(
+        index: Int,
         rowCount: Int,
         columnCount: Int,
         rowNames: HashMap<String, String>
@@ -149,9 +142,9 @@ class StudentSeatMapFragment : Fragment() {
                 seat.rowName = "Row: $rowIndex Column: $columnIndex"
                 seat.columnIndex = columnIndex
                 seat.rowIndex = rowIndex
-                seat.type = Seat.TYPE.SELECTABLE
+                seat.type = Seat.TYPE.UNSELECTABLE
 
-                if(counter == index!!){
+                if (counter == index) {
                     seat.drawableColor = "#808080"
                 } else {
                     seat.drawableColor = "#FFFFFF"
@@ -164,15 +157,14 @@ class StudentSeatMapFragment : Fragment() {
         return seatArray
     }
 
-    private fun generateAttendance(){
+    private fun generateAttendance() {
 
         rv_attendance.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
 
         val pref = activity?.getSharedPreferences("Account", 0)
         val id = pref?.getString("studentId", "")
 
-
-       val query =  FirebaseFirestore.getInstance()
+        val query = FirebaseFirestore.getInstance()
             .collection("Users")
             .document(id!!)
             .collection("attendance")
@@ -182,8 +174,6 @@ class StudentSeatMapFragment : Fragment() {
             .setQuery(query, AttendanceStatus::class.java)
             .build()
 
-
-        Log.e("DATA", options.snapshots.toString())
 
         attendanceAdapter = AttendanceAdapter(options)
         rv_attendance.adapter = attendanceAdapter

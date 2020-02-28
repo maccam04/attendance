@@ -12,9 +12,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -23,22 +24,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Name" />
+
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_user_name"
+        android:id="@+id/til_id"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="@+id/til_name"
-        app:layout_constraintStart_toStartOf="@+id/til_name"
-        app:layout_constraintTop_toBottomOf="@+id/til_name">
+        android:focusableInTouchMode="false"
+        app:hintAnimationEnabled="false"
+        app:layout_constraintEnd_toEndOf="@+id/til_contact"
+        app:layout_constraintStart_toStartOf="@+id/til_contact"
+        app:layout_constraintTop_toBottomOf="@+id/til_contact">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/tie_id_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Student Number"
+            android:hint="Id Number"
+            android:inputType="numberSigned"
             android:maxLength="7" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -47,14 +52,16 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="@+id/til_user_name"
-        app:layout_constraintStart_toStartOf="@+id/til_user_name"
-        app:layout_constraintTop_toBottomOf="@+id/til_user_name">
+        app:layout_constraintEnd_toEndOf="@+id/til_name"
+        app:layout_constraintStart_toStartOf="@+id/til_name"
+        app:layout_constraintTop_toBottomOf="@+id/til_name">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/tie_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:focusableInTouchMode="false"
+            android:focusable="false"
             android:hint="Email" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -71,7 +78,9 @@
             android:id="@+id/tie_contact_no"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Contact Number" />
+            android:hint="Contact Number"
+            android:inputType="numberDecimal"
+            android:maxLength="11" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -79,9 +88,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         app:layout_constraintEnd_toEndOf="@+id/til_contact"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/til_contact"
-        app:layout_constraintTop_toBottomOf="@+id/til_contact">
+        app:layout_constraintTop_toBottomOf="@+id/til_id">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/tie_update_course"

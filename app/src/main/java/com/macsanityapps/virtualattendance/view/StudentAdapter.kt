@@ -44,7 +44,7 @@ class StudentAdapter(var context: Context, var studentListener: StudentListener)
 
             btnDisapproved.setOnClickListener {
 
-                studentListener.handleDisapproved(options[adapterPosition].id, adapterPosition)
+                studentListener.handleDisapproved(options[adapterPosition], adapterPosition)
             }
         }
     }
@@ -57,7 +57,7 @@ class StudentAdapter(var context: Context, var studentListener: StudentListener)
     interface StudentListener {
 
         fun handleApproved(user: User, adapterPosition: Int)
-        fun handleDisapproved(id: String?, adapterPosition: Int)
+        fun handleDisapproved(user: User?, adapterPosition: Int)
 
     }
 }
