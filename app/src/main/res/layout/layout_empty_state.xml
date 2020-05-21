@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/iv_empty"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
@@ -14,8 +14,7 @@
         app:layout_constraintDimensionRatio="h,3:3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_empty_room" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_empty_text"

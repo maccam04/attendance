@@ -11,25 +11,25 @@
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Virtual Attendance System Login"
+        android:text="Automated Seat plan Arrangement using Classification Process"
         android:textAlignment="center"
-        android:textSize="30sp"
+        android:textSize="18sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_logo"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/iv_logo"
+        android:layout_width="0dp"
+        android:layout_height="160dp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline"
-        tools:visibility="visible" />
-
-
-    <ImageView
-        android:id="@+id/iv_logo"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:src="@drawable/login_icon"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_title"
+        app:srcCompat="@drawable/logo_transparent"
         tools:visibility="visible" />
 
     <com.google.android.gms.common.SignInButton

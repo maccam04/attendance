@@ -44,6 +44,7 @@ class SeatPlanFragment : Fragment(), Callback<String> {
 
     private var size: String? = ""
     private var data: MutableList<User> = mutableListOf()
+    private var sortedList: MutableList<User> = mutableListOf()
     private var index: Int? = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,7 +83,12 @@ class SeatPlanFragment : Fragment(), Callback<String> {
             .whereEqualTo("type", 1)
             .get()
             .addOnSuccessListener {
-                data = it.toObjects(User::class.java)
+
+                val userData = it.toObjects(User::class.java).sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { user -> user.name!! })
+
+                data.clear()
+                data.addAll(userData)
+
                 tv_student_count.text = "Number of Student/s in this section: ${data.size}"
 
                 if (data.size != 0) {

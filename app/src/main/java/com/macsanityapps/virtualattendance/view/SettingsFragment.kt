@@ -58,8 +58,16 @@ class SettingsFragment : Fragment() {
         }
 
         tv_edit_profile.setOnClickListener {
-            val dir = DashboardFragmentDirections.actionDashboardFragmentToUpdateProfileFragment()
-            findNavController().navigate(dir)
+
+            if(role == "0"){
+                val dir = DashboardFragmentDirections.actionDashboardFragmentToUpdateProfileFragment()
+                findNavController().navigate(dir)
+            } else {
+                val dir = TeacherDashboardFragmentDirections.actionTeacherDashboardFragmentToUpdateProfileFragment()
+                findNavController().navigate(dir)
+            }
+
+
         }
 
         btn_logout.setOnClickListener {
@@ -92,9 +100,15 @@ class SettingsFragment : Fragment() {
                             GoogleSignIn.getClient(it, gsoBuilder.build())?.signOut()
                         }
 
-                        val direction =
-                            UpdateProfileFragmentDirections.actionUpdateProfileFragmentToLoginFragment()
-                        findNavController().navigate(direction)
+
+                        if(role == "0"){
+                            val dir = DashboardFragmentDirections.actionDashboardFragmentToLoginFragment()
+                            findNavController().navigate(dir)
+                        } else {
+                            val dir = TeacherDashboardFragmentDirections.actionTeacherDashboardFragmentToLoginFragment()
+                            findNavController().navigate(dir)
+                        }
+
                     }
 
 

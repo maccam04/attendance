@@ -72,13 +72,18 @@ class StudentHomeFragment : Fragment(), RoomsAdapter.RoomListener {
 
         query.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
 
-            if (querySnapshot?.isEmpty!!) {
-                inc_empty_state.visibility = View.VISIBLE
-                tv_empty_text.text = "You don't have rooms enrolled yet."
-            } else {
-                inc_empty_state.visibility = View.GONE
-            }
+            try {
+                if (querySnapshot?.isEmpty!!) {
+                    iv_empty.setImageResource(R.drawable.ic_empty_room)
+                    inc_empty_state.visibility = View.VISIBLE
+                    tv_empty_text.text = "You don't have rooms enrolled yet."
+                } else {
 
+                    inc_empty_state.visibility = View.GONE
+                }
+            } catch(e : Exception){
+
+            }
         }
 
         val options = FirestoreRecyclerOptions.Builder<Rooms>()

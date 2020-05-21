@@ -9,23 +9,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.macsanityapps.virtualattendance.R
 import com.macsanityapps.virtualattendance.VirtualAttendanceApplication
 import com.macsanityapps.virtualattendance.common.makeToast
-import com.macsanityapps.virtualattendance.data.Rooms
 import com.macsanityapps.virtualattendance.data.User
-import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.fragment_student_request.*
-import kotlinx.android.synthetic.main.fragment_student_request.inc_empty_state
-import kotlinx.android.synthetic.main.fragment_teacher_dashboard.*
 import kotlinx.android.synthetic.main.layout_empty_state.*
 import org.json.JSONException
 import retrofit2.Call
@@ -45,6 +39,8 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener, Callb
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setHasOptionsMenu(true)
+
     }
 
     override fun onCreateView(
@@ -57,6 +53,13 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener, Callb
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
+
+        (activity as AppCompatActivity).supportActionBar?.title = "Student List"
+
 
         studentAdapter = StudentAdapter(activity!!, this)
 
@@ -71,6 +74,8 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener, Callb
         super.onStart()
 
         initData()
+
+        iv_empty.setImageDrawable(ContextCompat.getDrawable(activity!!, R.drawable.ic_empty_room))
 
     }
 
@@ -90,14 +95,20 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener, Callb
                 }
 
                 if (snapshots?.isEmpty!!) {
-                    iv_empty.setImageResource(R.drawable.ic_students)
-                    inc_empty_state.visibility = View.VISIBLE
-                    tv_empty_text.text = "No student/s found."
+                    if(inc_empty_state != null) inc_empty_state.visibility = View.VISIBLE
+                    if(tv_empty_text != null) tv_empty_text.text = "No student/s found."
+                    if(rv_students != null)  rv_students.visibility = View.GONE
 
-                    rv_students.visibility = View.GONE
                 } else {
-                    inc_empty_state.visibility = View.GONE
-                    rv_students.visibility = View.VISIBLE
+
+                    try {
+                        if(inc_empty_state != null && inc_empty_state.isVisible) inc_empty_state.visibility = View.GONE
+                        if(rv_students != null)    rv_students.visibility = View.VISIBLE
+                    } catch (npe : NullPointerException){
+                        Log.e("Empty State", npe.localizedMessage)
+                    }
+
+
                 }
 
                 dataList.clear()
@@ -130,7 +141,7 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener, Callb
                 .document(it)
                 .update(map as Map<String, Int>)
                 .addOnSuccessListener {
-                    makeToast("Successfully approved!")
+
                     studentAdapter.addStudent(dataList)
 
                     try {
@@ -154,7 +165,7 @@ class StudentRequestFragment : Fragment(), StudentAdapter.StudentListener, Callb
 
                 }.addOnFailureListener {
                     Log.e("ERROR", it.localizedMessage)
-                    makeToast("Something went wrong. Please Try again later.")
+
                 }
         }
 

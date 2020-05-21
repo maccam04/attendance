@@ -75,18 +75,18 @@ class StudentSeatMapFragment : Fragment() {
         FirebaseFirestore.getInstance()
             .collection("Rooms")
             .document(arguments!!.getString("id"))
-            .get().addOnSuccessListener {
+            .get().addOnSuccessListener { it ->
 
                 val rooms = it.toObject(Rooms::class.java)
+                val sortedList = rooms!!.studentsList!!.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { text -> text })
 
-                index = rooms!!.studentsList!!.indexOfFirst { e -> e == name }
-                Log.e("TAG", "Data Comes $index ")
+                index = sortedList.indexOfFirst { e -> e == name }
 
                 activity!!.runOnUiThread {
                     val seatArray = generatePreLoadData(index!!, rowCount, columnCount, rowNames)
                     seatView!!.initSeatView(seatArray, rowCount, columnCount, rowNames)
                     initSeatView()
-                    Log.e("TAG", "Render Data Comes ${data.indexOfFirst { it.email == name }}")
+
 
                     generateAttendance()
                 }

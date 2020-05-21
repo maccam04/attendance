@@ -3,11 +3,13 @@ package com.macsanityapps.virtualattendance.view
 
 import android.graphics.Canvas
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +26,7 @@ import kotlinx.android.synthetic.main.fragment_teacher_dashboard.*
 import kotlinx.android.synthetic.main.fragment_teacher_home.*
 import kotlinx.android.synthetic.main.fragment_teacher_home.cl_parent
 import kotlinx.android.synthetic.main.layout_empty_state.*
+import java.lang.NullPointerException
 
 /**
  * A simple [Fragment] subclass.
@@ -39,6 +42,12 @@ class TeacherHomeFragment : Fragment(), RoomsAdapter.RoomListener {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_teacher_home, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        initRecyclerView()
     }
 
 
@@ -57,12 +66,17 @@ class TeacherHomeFragment : Fragment(), RoomsAdapter.RoomListener {
         query.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
 
             if (querySnapshot?.isEmpty!!) {
+                iv_empty.setImageResource(R.drawable.ic_empty_room)
                 inc_empty_state.visibility = View.VISIBLE
                 tv_empty_text.text = "You don't have rooms enrolled yet."
             } else {
-                inc_empty_state.visibility = View.GONE
-            }
+                try {
+                    if(inc_empty_state != null && inc_empty_state.isVisible) inc_empty_state.visibility = View.GONE
+                } catch (npe : NullPointerException){
+                    Log.e("Empty State", npe.localizedMessage);
+                }
 
+            }
 
         }
 
